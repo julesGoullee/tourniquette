@@ -1,0 +1,9 @@
+scene/node_modules
+server/node_modules
+server/src/*.js
+.DS_Store
+.idea
+.vscode
+.env
+scene/bin
+scene/export
