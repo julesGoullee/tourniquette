@@ -2,6 +2,9 @@ import * as ui from '../node_modules/@dcl/ui-utils/index'
 import { getCurrentRealm } from '@decentraland/EnvironmentAPI'
 import { Ground } from './entities/ground'
 import { TheTourniquette } from "./entities/theTourniquette"
+import { ThePilones } from "./entities/pilones"
+import { Teleporter } from "./entities/teleporter"
+
 
 class Game implements ISystem {
 
@@ -10,12 +13,17 @@ class Game implements ISystem {
   userId: string
 
   ground: Entity
+  pilones: Entity[] = []
+  marginPilones = 3
   theTourniquette: Entity
+  teleporter: Entity
 
   constructor() {
 
     this.createGround()
     this.createTheTourniquette()
+    this.createThePilones()
+    this.createTeleporter()
 
   }
 
@@ -33,11 +41,41 @@ class Game implements ISystem {
 
   createTheTourniquette(){
     this.theTourniquette = new TheTourniquette(new BoxShape(), new Transform({
-      position: new Vector3(8, 1, 8),
-      scale:  new Vector3(12, 0.5, 0.01)
+      position: new Vector3(8, 13, 8),
+      scale:  new Vector3(12, 1, 1)
     }) )
 
   }
+
+  createThePilones(){
+    const scale = new Vector3(1.5, 0.2, 1.5)
+    this.pilones.push(new ThePilones(new BoxShape(), new Transform({
+        position: new Vector3(3, 12, 8),
+        scale
+      }) ))
+    this.pilones.push(new ThePilones(new BoxShape(), new Transform({
+      position: new Vector3(8, 12, 3),
+      scale
+    }) ))
+    this.pilones.push(new ThePilones(new BoxShape(), new Transform({
+      position: new Vector3(13, 12, 8),
+      scale
+    }) ))
+    this.pilones.push(new ThePilones(new BoxShape(), new Transform({
+      position: new Vector3(8, 12, 13),
+      scale
+    }) ))
+  }
+
+  createTeleporter(){
+
+    this.teleporter = new Teleporter(new BoxShape(), new Transform({
+      position: new Vector3(8, 1, 8),
+      scale: new Vector3(1, 1, 1)
+    }) )
+
+  }
+
 
 
   start(){

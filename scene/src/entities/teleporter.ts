@@ -1,5 +1,7 @@
 import utils from "../../node_modules/decentraland-ecs-utils/index"
-export class TheTourniquette extends Entity {
+import { movePlayerTo } from '@decentraland/RestrictedActions'
+
+export class Teleporter extends Entity {
 
   rotateAngle = 70
 
@@ -10,10 +12,14 @@ export class TheTourniquette extends Entity {
     model.withCollisions = true
     this.addComponent(transform)
     this.addComponent(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotateAngle, 0)))
-    //this.addComponent(new utils.Interval(500, () => {
-      //this.rotateAngle += 10
-      //this.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotateAngle, 0) ) )
-    //}))
+    this.addComponent(
+       new OnPointerDown(
+         (e) => {
+           movePlayerTo({ x: 1, y: 0, z: 1 }, { x: 8, y: 1, z: 8 })
+         },
+         { hoverText: "Start" }
+       )
+     )
 
     engine.addEntity(this)
 
