@@ -4,6 +4,7 @@ import { Ground } from './entities/ground'
 import { TheTourniquette } from "./entities/theTourniquette"
 import { ThePilones } from "./entities/pilones"
 import { Teleporter } from "./entities/teleporter"
+import { AvatarHitbox } from "./entities/avatarHitbox"
 
 
 class Game implements ISystem {
@@ -17,6 +18,7 @@ class Game implements ISystem {
   marginPilones = 3
   theTourniquette: Entity
   teleporter: Entity
+  avatarHitbox: Entity
 
   constructor() {
 
@@ -24,6 +26,7 @@ class Game implements ISystem {
     this.createTheTourniquette()
     this.createThePilones()
     this.createTeleporter()
+    //this.createAvatarHitbox()
 
   }
 
@@ -41,8 +44,9 @@ class Game implements ISystem {
 
   createTheTourniquette(){
     this.theTourniquette = new TheTourniquette(new BoxShape(), new Transform({
-      position: new Vector3(8, 13, 8),
-      scale:  new Vector3(12, 1, 1)
+      //position: new Vector3(8, 13, 8),
+      position: new Vector3(8, 12.5, 8),
+      scale:  new Vector3(12.5, 0.2, 0.01)
     }) )
 
   }
@@ -76,7 +80,14 @@ class Game implements ISystem {
 
   }
 
+  createAvatarHitbox(){
 
+    this.avatarHitbox = new AvatarHitbox(new BoxShape(), new Transform({
+      position: new Vector3(0, 0, 0),
+      scale: new Vector3(0.5, 2, 0.5)
+    }) )
+
+  }
 
   start(){
 
