@@ -1,6 +1,7 @@
 import * as ui from '../node_modules/@dcl/ui-utils/index'
 import { getCurrentRealm } from '@decentraland/EnvironmentAPI'
 import { Ground } from './entities/ground'
+import { TheTourniquette } from "./entities/theTourniquette"
 
 class Game implements ISystem {
 
@@ -9,10 +10,12 @@ class Game implements ISystem {
   userId: string
 
   ground: Entity
+  theTourniquette: Entity
 
   constructor() {
 
     this.createGround()
+    this.createTheTourniquette()
 
   }
 
@@ -21,13 +24,21 @@ class Game implements ISystem {
   }
 
   createGround(){
-
     this.ground = new Ground(new GLTFShape('models/FloorBaseGrass.glb'), new Transform({
       position: new Vector3(8, -0.11, 8),
       scale:  new Vector3(1.6, 1, 1.6)
     }) )
 
   }
+
+  createTheTourniquette(){
+    this.theTourniquette = new TheTourniquette(new BoxShape(), new Transform({
+      position: new Vector3(8, 1, 8),
+      scale:  new Vector3(12, 0.5, 0.01)
+    }) )
+
+  }
+
 
   start(){
 
