@@ -5,16 +5,18 @@ import { TheTourniquette } from "./entities/theTourniquette"
 import { ThePilones } from "./entities/pilones"
 import { Teleporter } from "./entities/teleporter"
 import { AvatarHitbox } from "./entities/avatarHitbox"
-
+import {movePlayerTo} from "@decentraland/RestrictedActions";
+import { getUserData } from "@decentraland/Identity"
 
 class Game implements ISystem {
 
-  webSocketUrl = 'ws://192.168.100.4:13370'
+  webSocketUrl = 'ws://192.168.100.5:13370'
   socket: WebSocket
   userId: string
 
   ground: Entity
   pilones: Entity[] = []
+
   marginPilones = 3
   theTourniquette: Entity
   teleporter: Entity
@@ -27,6 +29,7 @@ class Game implements ISystem {
     this.createThePilones()
     this.createTeleporter()
     //this.createAvatarHitbox()
+    this.joinSocketsServer()
 
   }
 
@@ -78,6 +81,25 @@ class Game implements ISystem {
       scale: new Vector3(1, 1, 1)
     }) )
 
+    this.teleporter.addComponent(
+      new OnPointerDown(
+        (e) => {
+
+          if(!this.socket){
+            log('Error socket not connected')
+            return false
+          }
+          this.socket.send(JSON.stringify({
+            type: 'START',
+            data: {}
+          }) )
+
+        },
+        { hoverText: "Start" }
+      )
+    )
+
+
   }
 
   createAvatarHitbox(){
@@ -91,12 +113,17 @@ class Game implements ISystem {
 
   start(){
 
+    log('youhou')
   }
 
   async joinSocketsServer() {
 
     const realm = await getCurrentRealm()
     log(`You are in the realm: `, realm.displayName)
+
+    const userData = await getUserData()
+    this.userId = userData.displayName
+    log(`You are: `, userData.displayName)
 
     this.socket = new WebSocket(
       `${this.webSocketUrl}/broadcast/${realm.displayName}`
@@ -110,22 +137,8 @@ class Game implements ISystem {
           userId: this.userId
         }
       }) )
-      new ui.OptionPrompt(
-        'Welcome!',
-        'You can train here, do you want to participate to the next battle?',
-        () => {
-          this.socket.send(JSON.stringify({
-            type: 'PLAYER_READY',
-            data: {}
-          }) )
-        },
-        () => {
-          log(`Nope`)
-        },
-        'Yep',
-        'Nope',
-        true
-      )
+
+
     }
 
     this.socket.onclose = (closeEvent) => {
@@ -149,9 +162,6 @@ class Game implements ISystem {
               time: Date.now()
             }
           }) )
-          break
-        }
-        case 'PATH': {
           break
         }
         case 'START': {

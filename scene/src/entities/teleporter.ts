@@ -8,14 +8,14 @@ export class Teleporter extends Entity {
     this.addComponent(model)
     model.withCollisions = true
     this.addComponent(transform)
-    this.addComponent(
-       new OnPointerDown(
-         (e) => {
-           movePlayerTo({ x: 3, y: 13, z: 8 }, { x: 8, y: 13, z: 8 })
-         },
-         { hoverText: "Start" }
-       )
-     )
+    // this.addComponent(
+    //    new OnPointerDown(
+    //      (e) => {
+    //        movePlayerTo({ x: 3, y: 13, z: 8 }, { x: 8, y: 13, z: 8 })
+    //      },
+    //      { hoverText: "Start" }
+    //    )
+    //  )
 
     engine.addEntity(this)
 

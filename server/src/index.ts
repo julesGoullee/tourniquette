@@ -2,7 +2,7 @@ import * as WebSocket from 'ws'
 
 const CONFIG = {
   PORT: parseInt(process.env.PORT || '13370', 10),
-  PLAYERS_COUNT: parseInt(process.env.PLAYERS_COUNT || '2', 10),
+  MAX_PLAYERS_COUNT: parseInt(process.env.MAX_PLAYERS_COUNT || '4', 10),
 }
 
 class User {
@@ -69,12 +69,13 @@ class User {
 
             this.id = parsed.data.userId
           }
+          this.room.playerReady(this)
 
           break
 
-        case 'PLAYER_READY':
+        case 'START':
 
-          this.room.playerReady(this)
+          this.room.start()
           break
 
         case 'END_GAME':
@@ -190,19 +191,22 @@ class Room {
 
       })
 
-      if(this.users.filter(oneUser => oneUser.isPlaying).length < 2){
-
-        this.endGame()
-
-      }
-
     }
 
   }
 
   start(){
 
-    const usersPlaying = this.queueUsersReady.splice( 0, CONFIG.PLAYERS_COUNT)
+    if(this.isPlaying || this.queueUsersReady.length === 0){
+
+      console.error(`Room: cannot start`)
+
+      return false
+
+    }
+
+    this.isPlaying = true
+    const usersPlaying = this.queueUsersReady.splice( 0, CONFIG.MAX_PLAYERS_COUNT)
 
     usersPlaying.forEach(oneUser => {
       oneUser.isPlaying = true
@@ -234,18 +238,6 @@ class Room {
 
     }
 
-    if(!this.isPlaying && this.queueUsersReady.length >= CONFIG.PLAYERS_COUNT){
-
-      this.start()
-
-    } else {
-
-      user.ws.send(JSON.stringify({
-        type: 'TRAINING',
-        data: {}
-      }) )
-
-    }
 
   }
 
@@ -264,7 +256,7 @@ class Room {
 
     setTimeout( () => {
 
-      if(this.queueUsersReady.length >= CONFIG.PLAYERS_COUNT){
+      if(this.queueUsersReady.length >= CONFIG.MAX_PLAYERS_COUNT){
 
         this.start()
 
