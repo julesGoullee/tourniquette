@@ -35,7 +35,7 @@ class Game implements ISystem {
     this.createThePilones()
     this.createTeleporter()
     //this.createAvatarHitbox()
-    this.joinSocketsServer()
+    this.joinSocketsServer().catch(error => log('error join socket server', error) )
 
   }
 
@@ -109,12 +109,11 @@ class Game implements ISystem {
 
   }
 
-  start(playersID : []){
+  start(playersId : []){
 
-    log('Hello', playersID)
-    movePlayerTo(this.gameSpots[playersID.indexOf(this.userId as never)].add(new Vector3(0, 1, 0)), { x: 8, y: 13, z: 8 })
+    movePlayerTo(this.gameSpots[playersId.indexOf(this.userId as never)].add(new Vector3(0, 1, 0)), { x: 8, y: 13, z: 8 })
 
-    this.theTourniquette.addComponent(new utils.Delay(500, () => {
+    this.theTourniquette.addComponent(new utils.Delay(1000, () => {
       this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
     }))
 
@@ -141,7 +140,6 @@ class Game implements ISystem {
           userId: this.userId
         }
       }) )
-
 
     }
 
