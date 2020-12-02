@@ -4,12 +4,12 @@ import utils from '../node_modules/decentraland-ecs-utils/index'
 import {movePlayerTo} from '@decentraland/RestrictedActions'
 import { getUserData } from '@decentraland/Identity'
 
-import { Ground } from './entities/ground'
+// import { Ground } from './entities/ground'
+// import { AvatarHitbox } from './entities/avatarHitbox'
+// import { Santa } from './entities/santa'
 import { TheTourniquette } from './entities/theTourniquette'
 import { ThePilones } from './entities/pilones'
 import { Teleporter } from './entities/teleporter'
-import { AvatarHitbox } from './entities/avatarHitbox'
-import { Santa } from './entities/santa'
 import { XmasBall } from './entities/xmasBall'
 
 
@@ -18,7 +18,10 @@ class Game implements ISystem {
   webSocketUrl = 'ws://192.168.100.4:13370'
   socket: WebSocket
   userId: string
-  currentPosition: Vector3
+  // currentPosition: Vector3
+  camera: Camera = Camera.instance
+  isPlaying = false
+  fallenOut = false
 
   gameSpots: Vector3[] = [
     new Vector3(3, 12, 8),
@@ -26,15 +29,14 @@ class Game implements ISystem {
     new Vector3(13, 12, 8),
     new Vector3(8, 12, 13)
   ]
-  marginPilones = 3
 
-  ground: Entity
+  // ground: Entity
   xmasBall: Entity
   pilones: Entity[] = []
   theTourniquette: Entity
   teleporter: Entity
-  avatarHitbox: Entity
-  santa: Santa
+  // avatarHitbox: Entity
+  // santa: Santa
 
   constructor() {
 
@@ -43,7 +45,7 @@ class Game implements ISystem {
     this.createTheTourniquette()
     this.createThePilones()
     this.createTeleporter()
-    //this.createAvatarHitbox()
+    // this.createAvatarHitbox()
     this.joinSocketsServer().catch(error => log('error join socket server', error) )
 
   }
@@ -54,25 +56,48 @@ class Game implements ISystem {
   //   this.santa.setParent(Attachable.AVATAR)
   //
   //   Hide avatars
-    // const hideAvatarsEntity = new Entity()
-    //   hideAvatarsEntity.addComponent(new AvatarModifierArea({ area: { box: new Vector3(16, 4, 11) }, modifiers: [AvatarModifiers.HIDE_AVATARS] }) )
-    // hideAvatarsEntity.addComponent(new Transform({ position: new Vector3(8, 2, 10.5) }) )
-    // engine.addEntity(hideAvatarsEntity)
-    //
-    // Create to show Santa avatar
-    // hideAvatarsEntity.addComponent(
-    //   new utils.TriggerComponent(
-    //     new utils.TriggerBoxShape(new Vector3(16, 4, 11), Vector3.Zero() ),
-    //     null, null, null, null,
-    //     () => { this.santa.getComponent(Transform).scale.setAll(1) },
-    //     () => { this.santa.getComponent(Transform).scale.setAll(0) }
-    //   )
-    // )
+  // const hideAvatarsEntity = new Entity()
+  //   hideAvatarsEntity.addComponent(new AvatarModifierArea({ area: { box: new Vector3(16, 4, 11) }, modifiers: [AvatarModifiers.HIDE_AVATARS] }) )
+  // hideAvatarsEntity.addComponent(new Transform({ position: new Vector3(8, 2, 10.5) }) )
+  // engine.addEntity(hideAvatarsEntity)
+  //
+  // Create to show Santa avatar
+  // hideAvatarsEntity.addComponent(
+  //   new utils.TriggerComponent(
+  //     new utils.TriggerBoxShape(new Vector3(16, 4, 11), Vector3.Zero() ),
+  //     null, null, null, null,
+  //     () => { this.santa.getComponent(Transform).scale.setAll(1) },
+  //     () => { this.santa.getComponent(Transform).scale.setAll(0) }
+  //   )
+  // )
 
 
   // }
 
+  playerFallOut(){
+
+    log('playerFallOut')
+    this.fallenOut = true
+    this.socket.send(JSON.stringify({
+      type: 'FALLEN_OUT',
+      data: {}
+    }) )
+
+  }
+
   update(dt: number): void {
+
+    if(this.isPlaying && !this.fallenOut && (
+      this.camera.position.y < 4 ||
+      this.camera.position.x < 0 ||
+      this.camera.position.x > 16 ||
+      this.camera.position.z > 16 ||
+      this.camera.position.z < 0
+    ) ){
+
+      this.playerFallOut()
+
+    }
 
     // if(this.santa){
     //
@@ -130,7 +155,7 @@ class Game implements ISystem {
   createTeleporter(){
 
     this.teleporter = new Teleporter(new BoxShape(), new Transform({
-      position: new Vector3(8, 1, 8),
+      position: new Vector3(2, 2, 2),
       scale: new Vector3(1, 1, 1)
     }) )
 
@@ -155,22 +180,40 @@ class Game implements ISystem {
 
   }
 
-  createAvatarHitbox(){
-
-    this.avatarHitbox = new AvatarHitbox(new BoxShape(), new Transform({
-      position: new Vector3(0, 0, 0),
-      scale: new Vector3(0.5, 2, 0.5)
-    }) )
-
-  }
+  // createAvatarHitbox(){
+  //
+  //   this.avatarHitbox = new AvatarHitbox(new BoxShape(), new Transform({
+  //     position: new Vector3(0, 0, 0),
+  //     scale: new Vector3(0.5, 2, 0.5)
+  //   }) )
+  //   this.avatarHitbox.addComponent(
+  //     new utils.TriggerComponent(
+  //       new utils.TriggerBoxShape(new Vector3(16, 6, 16), new Vector3(8, 0, 8) ),
+  //       null, null, null, null,
+  //       () => { log('enter') },
+  //       () => { log('exit') }, true
+  //     )
+  //   )
+  // }
 
   start(playersId : []){
 
-    movePlayerTo(this.gameSpots[playersId.indexOf(this.userId as never)].add(new Vector3(0, 1, 0)), { x: 8, y: 13, z: 8 })
+    const userPosition = playersId.indexOf(this.userId as never)
 
-    this.theTourniquette.addComponent(new utils.Delay(1000, () => {
+    if(userPosition === -1){
+
+      log('User not playing')
+      return false
+
+    }
+
+    movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 1, 0)), { x: 8, y: 13, z: 8 })
+
+    this.theTourniquette.addComponent(new utils.Delay(2000, () => {
       this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
-    }))
+      this.isPlaying = true
+      this.fallenOut = false
+    }) )
 
   }
 
@@ -225,7 +268,17 @@ class Game implements ISystem {
           this.start(parsed.data.playersId)
           break
         }
-        case 'USER_LEFT': {
+        case 'END_GAME': {
+
+          if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
+
+            this.theTourniquette.getComponent(utils.KeepRotatingComponent).stop()
+            this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
+
+          }
+          break
+        }
+        case 'FALLEN_OUT': {
           break
         }
       }
