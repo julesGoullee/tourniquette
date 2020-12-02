@@ -1,22 +1,23 @@
 //import * as ui from '../node_modules/@dcl/ui-utils/index'
 import { getCurrentRealm } from '@decentraland/EnvironmentAPI'
+import utils from '../node_modules/decentraland-ecs-utils/index'
+import {movePlayerTo} from '@decentraland/RestrictedActions'
+import { getUserData } from '@decentraland/Identity'
+
 import { Ground } from './entities/ground'
-import { TheTourniquette } from "./entities/theTourniquette"
-import { ThePilones } from "./entities/pilones"
-import { Teleporter } from "./entities/teleporter"
-import { AvatarHitbox } from "./entities/avatarHitbox"
-import {movePlayerTo} from "@decentraland/RestrictedActions";
-import { getUserData } from "@decentraland/Identity"
-import utils from "../node_modules/decentraland-ecs-utils/index"
+import { TheTourniquette } from './entities/theTourniquette'
+import { ThePilones } from './entities/pilones'
+import { Teleporter } from './entities/teleporter'
+import { AvatarHitbox } from './entities/avatarHitbox'
+import { Santa } from './entities/santa'
 
 class Game implements ISystem {
 
   webSocketUrl = 'ws://192.168.100.4:13370'
   socket: WebSocket
   userId: string
+  currentPosition: Vector3
 
-  ground: Entity
-  pilones: Entity[] = []
   gameSpots: Vector3[] = [
     new Vector3(3, 12, 8),
     new Vector3(8, 12, 3),
@@ -24,9 +25,13 @@ class Game implements ISystem {
     new Vector3(8, 12, 13)
   ]
   marginPilones = 3
+
+  ground: Entity
+  pilones: Entity[] = []
   theTourniquette: Entity
   teleporter: Entity
   avatarHitbox: Entity
+  santa: Santa
 
   constructor() {
 
@@ -39,7 +44,46 @@ class Game implements ISystem {
 
   }
 
+  createSanta(){
+
+    this.santa = new Santa(new GLTFShape("models/santa.glb"), new Transform({ position: new Vector3(0, 0.05, -0.10), scale: new Vector3(0, 0, 0)}) )
+    this.santa.setParent(Attachable.AVATAR)
+
+    // Hide avatars
+    const hideAvatarsEntity = new Entity()
+      hideAvatarsEntity.addComponent(new AvatarModifierArea({ area: { box: new Vector3(16, 4, 11) }, modifiers: [AvatarModifiers.HIDE_AVATARS] }) )
+    hideAvatarsEntity.addComponent(new Transform({ position: new Vector3(8, 2, 10.5) }) )
+    engine.addEntity(hideAvatarsEntity)
+
+    // Create to show Santa avatar
+    hideAvatarsEntity.addComponent(
+      new utils.TriggerComponent(
+        new utils.TriggerBoxShape(new Vector3(16, 4, 11), Vector3.Zero() ),
+        null, null, null, null,
+        () => { this.santa.getComponent(Transform).scale.setAll(1) },
+        () => { this.santa.getComponent(Transform).scale.setAll(0) }
+      )
+    )
+
+
+  }
+
   update(dt: number): void {
+
+    if(this.santa){
+
+      if(this.currentPosition.equals(Camera.instance.position) ){
+
+        this.santa.playIdle()
+
+      } else {
+
+        this.currentPosition.copyFrom(Camera.instance.position)
+        this.santa.playRunning()
+
+      }
+
+    }
 
   }
 
@@ -82,7 +126,7 @@ class Game implements ISystem {
     this.teleporter.addComponent(
       new OnPointerDown(
         (e) => {
-
+          // this.createSanta()
           if(!this.socket){
             log('Error socket not connected')
             return false
@@ -93,7 +137,7 @@ class Game implements ISystem {
           }) )
 
         },
-        { hoverText: "Start" }
+        { hoverText: 'Start' }
       )
     )
 
