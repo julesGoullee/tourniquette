@@ -10,6 +10,8 @@ import { ThePilones } from './entities/pilones'
 import { Teleporter } from './entities/teleporter'
 import { AvatarHitbox } from './entities/avatarHitbox'
 import { Santa } from './entities/santa'
+import { XmasBall } from './entities/xmasBall'
+
 
 class Game implements ISystem {
 
@@ -27,6 +29,7 @@ class Game implements ISystem {
   marginPilones = 3
 
   ground: Entity
+  xmasBall: Entity
   pilones: Entity[] = []
   theTourniquette: Entity
   teleporter: Entity
@@ -35,7 +38,8 @@ class Game implements ISystem {
 
   constructor() {
 
-    this.createGround()
+    // this.createGround()
+    this.createXmasBall()
     this.createTheTourniquette()
     this.createThePilones()
     this.createTeleporter()
@@ -44,55 +48,62 @@ class Game implements ISystem {
 
   }
 
-  createSanta(){
-
-    this.santa = new Santa(new GLTFShape("models/santa.glb"), new Transform({ position: new Vector3(0, 0.05, -0.10), scale: new Vector3(0, 0, 0)}) )
-    this.santa.setParent(Attachable.AVATAR)
-
-    // Hide avatars
-    const hideAvatarsEntity = new Entity()
-      hideAvatarsEntity.addComponent(new AvatarModifierArea({ area: { box: new Vector3(16, 4, 11) }, modifiers: [AvatarModifiers.HIDE_AVATARS] }) )
-    hideAvatarsEntity.addComponent(new Transform({ position: new Vector3(8, 2, 10.5) }) )
-    engine.addEntity(hideAvatarsEntity)
-
+  // createSanta(){
+  //
+  //   this.santa = new Santa(new GLTFShape("models/santa.glb"), new Transform({ position: new Vector3(0, 0.05, -0.10), scale: new Vector3(0, 0, 0)}) )
+  //   this.santa.setParent(Attachable.AVATAR)
+  //
+  //   Hide avatars
+    // const hideAvatarsEntity = new Entity()
+    //   hideAvatarsEntity.addComponent(new AvatarModifierArea({ area: { box: new Vector3(16, 4, 11) }, modifiers: [AvatarModifiers.HIDE_AVATARS] }) )
+    // hideAvatarsEntity.addComponent(new Transform({ position: new Vector3(8, 2, 10.5) }) )
+    // engine.addEntity(hideAvatarsEntity)
+    //
     // Create to show Santa avatar
-    hideAvatarsEntity.addComponent(
-      new utils.TriggerComponent(
-        new utils.TriggerBoxShape(new Vector3(16, 4, 11), Vector3.Zero() ),
-        null, null, null, null,
-        () => { this.santa.getComponent(Transform).scale.setAll(1) },
-        () => { this.santa.getComponent(Transform).scale.setAll(0) }
-      )
-    )
+    // hideAvatarsEntity.addComponent(
+    //   new utils.TriggerComponent(
+    //     new utils.TriggerBoxShape(new Vector3(16, 4, 11), Vector3.Zero() ),
+    //     null, null, null, null,
+    //     () => { this.santa.getComponent(Transform).scale.setAll(1) },
+    //     () => { this.santa.getComponent(Transform).scale.setAll(0) }
+    //   )
+    // )
 
 
-  }
+  // }
 
   update(dt: number): void {
 
-    if(this.santa){
-
-      if(this.currentPosition.equals(Camera.instance.position) ){
-
-        this.santa.playIdle()
-
-      } else {
-
-        this.currentPosition.copyFrom(Camera.instance.position)
-        this.santa.playRunning()
-
-      }
-
-    }
+    // if(this.santa){
+    //
+    //   if(this.currentPosition.equals(Camera.instance.position) ){
+    //
+    //     this.santa.playIdle()
+    //
+    //   } else {
+    //
+    //     this.currentPosition.copyFrom(Camera.instance.position)
+    //     this.santa.playRunning()
+    //
+    //   }
+    //
+    // }
 
   }
 
-  createGround(){
-    this.ground = new Ground(new GLTFShape('models/FloorBaseGrass.glb'), new Transform({
-      position: new Vector3(8, -0.11, 8),
-      scale:  new Vector3(1.6, 1, 1.6)
-    }) )
+  // createGround(){
+  //   this.ground = new Ground(new GLTFShape('models/FloorBaseGrass.glb'), new Transform({
+  //     position: new Vector3(8, -0.11, 8),
+  //     scale:  new Vector3(1.6, 1, 1.6)
+  //   }) )
+  //
+  // }
 
+  createXmasBall(){
+    this.xmasBall = new XmasBall(new GLTFShape('models/xmasBall.glb'), new Transform({
+      position: new Vector3(8, -0.11, 8),
+      scale:  new Vector3(1, 1, 1)
+    }) )
   }
 
   createTheTourniquette(){
