@@ -11,7 +11,7 @@ import utils from "../node_modules/decentraland-ecs-utils/index"
 
 class Game implements ISystem {
 
-  webSocketUrl = 'ws://192.168.100.5:13370'
+  webSocketUrl = 'ws://192.168.100.4:13370'
   socket: WebSocket
   userId: string
 
@@ -112,7 +112,7 @@ class Game implements ISystem {
   start(playersID : []){
 
     log('Hello', playersID)
-    movePlayerTo(this.gameSpots[playersID.indexOf(this.userId)].add(new Vector3(0, 1, 0)), { x: 8, y: 13, z: 8 })
+    movePlayerTo(this.gameSpots[playersID.indexOf(this.userId as never)].add(new Vector3(0, 1, 0)), { x: 8, y: 13, z: 8 })
 
     this.theTourniquette.addComponent(new utils.Delay(500, () => {
       this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
