@@ -13,8 +13,8 @@
   },
   "devDependencies": {
     "@dcl/ui-utils": "^1.5.0",
-    "decentraland": "^3.4.5",
-    "decentraland-ecs": "^6.6.1",
+    "decentraland": "^3.4.5-20201009170559.commit-fa9f1c1",
+    "decentraland-ecs": "^6.6.2-20201202140920.commit-ea5410b",
     "decentraland-ecs-utils": "^1.1.9"
   }
 }

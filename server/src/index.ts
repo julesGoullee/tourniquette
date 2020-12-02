@@ -12,8 +12,8 @@ class User {
   ws: WebSocket
   room: Room
   id?: string
-  winnerId?: string
   isPlaying = false
+  fallenOut = false
   intervalAlive?: NodeJS.Timeout
   wsIsAlive = true
 
@@ -87,10 +87,9 @@ class User {
           this.room.start()
           break
 
-        case 'END_GAME':
+        case 'FALLEN_OUT':
 
-          this.winnerId = parsed.data.userId
-          this.room.userEndGame(this)
+          this.room.userFallOut(this)
           break
 
       }
@@ -190,7 +189,7 @@ class Room {
         if(oneUser.ws.readyState === WebSocket.OPEN && oneUser.id){
 
           oneUser.ws.send(JSON.stringify({
-            type: 'USER_LEFT',
+            type: 'FALLEN_OUT',
             data: {
               userId: user.id
             }
@@ -200,15 +199,29 @@ class Room {
 
       })
 
+      if(this.users.filter(oneUser => oneUser.isPlaying && !oneUser.fallenOut).length >= 1){
+
+        this.endGame()
+
+      }
+
     }
 
   }
 
   start(){
 
-    if(this.isPlaying || this.queueUsersReady.length === 0){
+    if(this.isPlaying){
 
-      console.error(`Room: cannot start`)
+      console.error(`Room: cannot start already playing`)
+
+      return false
+
+    }
+
+    if(this.queueUsersReady.length === 0){
+
+      console.error(`Room: cannot start queue empty`)
 
       return false
 
@@ -221,11 +234,11 @@ class Room {
       oneUser.isPlaying = true
     })
 
-    this.users.forEach( (otherUser: User) => {
+    this.users.forEach( (oneUser: User) => {
 
-      if(otherUser.ws.readyState === WebSocket.OPEN){
+      if(oneUser.ws.readyState === WebSocket.OPEN){
 
-        otherUser.ws.send(JSON.stringify({
+        oneUser.ws.send(JSON.stringify({
           type: 'START',
           data: {
             playersId: this.users.filter(oneUser => oneUser.isPlaying).map(oneUser => oneUser.id)
@@ -247,47 +260,78 @@ class Room {
 
     }
 
-
   }
 
   endGame(){
 
-    const userKnowWinner = this.users.filter(oneUser => oneUser.isPlaying && oneUser.winnerId)
-    console.log(`Room: endGame winner ${userKnowWinner.length > 0 && userKnowWinner[0].winnerId}`)
+    const userWinner = this.users.filter(oneUser => oneUser.isPlaying && !oneUser.fallenOut)
+
+    if(userWinner.length > 1){
+
+      console.log(`Room: endGame error more than one winner ${userWinner}`)
+
+    } else if(userWinner.length === 0){
+
+      console.log(`Room: endGame nobody left`)
+
+    } else {
+
+      console.log(`Room: endGame winner ${userWinner[0].id}`)
+
+    }
 
     this.isPlaying = false
     this.users.forEach(oneUser => {
 
-      oneUser.isPlaying = false
-      delete oneUser.winnerId
+      if(oneUser.isPlaying){
+
+        oneUser.isPlaying = false
+        oneUser.fallenOut = false
+        this.queueUsersReady.push(oneUser)
+
+      }
 
     })
 
-    setTimeout( () => {
+    this.users.forEach(oneUser => {
 
-      if(this.queueUsersReady.length >= CONFIG.MAX_PLAYERS_COUNT){
+      if(oneUser.ws.readyState === WebSocket.OPEN && oneUser.id){
 
-        this.start()
+        oneUser.ws.send(JSON.stringify({
+          type: 'END_GAME',
+          data: {
+            userWinner: userWinner.length > 0 ? userWinner[0].id : null
+          }
+        }) )
 
       }
 
-    }, 1000)
+    })
 
   }
 
-  userEndGame(user: User){
+  userFallOut(user: User){
 
-    if(!this.users.find(oneUser => oneUser.isPlaying && !oneUser.winnerId) ){
+    user.fallenOut = true
 
-      if(this.users.find(oneUser => oneUser.isPlaying && oneUser.winnerId !== user.winnerId) ){
+    this.users.forEach( (oneUser: User) => {
 
-        console.log('Room: userEndGame mismatch winner')
+      if(oneUser.ws.readyState === WebSocket.OPEN){
 
-      } else {
-
-        this.endGame()
+        oneUser.ws.send(JSON.stringify({
+          type: 'FALLEN_OUT',
+          data: {
+            playerId: user.id
+          }
+        }) )
 
       }
+
+    })
+
+    if(this.users.filter(oneUser => oneUser.isPlaying && !oneUser.fallenOut).length <= 1 ){
+
+      this.endGame()
 
     }
 
