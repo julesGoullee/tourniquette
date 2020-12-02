@@ -55,7 +55,7 @@ class User {
 
       const parsed = JSON.parse(data.toString() )
 
-      console.info('WebSocket: client message', parsed)
+      console.info('WebSocket: client message', { userId: this.id }, parsed)
 
       switch (parsed.type){
 
@@ -64,6 +64,13 @@ class User {
           break
 
         case 'USER_ID':
+
+          if(User.Users.find(user => user.id === parsed.data.userId) ){
+
+            console.info('WebSocket: user already join, close the connection', parsed)
+            this.ws.close(0, 'User already joined')
+
+          }
 
           if(!this.id){
 
