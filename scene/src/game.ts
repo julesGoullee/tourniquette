@@ -1,4 +1,4 @@
-import * as ui from '../node_modules/@dcl/ui-utils/index'
+//import * as ui from '../node_modules/@dcl/ui-utils/index'
 import { getCurrentRealm } from '@decentraland/EnvironmentAPI'
 import { Ground } from './entities/ground'
 import { TheTourniquette } from "./entities/theTourniquette"
@@ -7,6 +7,7 @@ import { Teleporter } from "./entities/teleporter"
 import { AvatarHitbox } from "./entities/avatarHitbox"
 import {movePlayerTo} from "@decentraland/RestrictedActions";
 import { getUserData } from "@decentraland/Identity"
+import utils from "../node_modules/decentraland-ecs-utils/index"
 
 class Game implements ISystem {
 
@@ -16,7 +17,12 @@ class Game implements ISystem {
 
   ground: Entity
   pilones: Entity[] = []
-
+  gameSpots: Vector3[] = [
+    new Vector3(3, 12, 8),
+    new Vector3(8, 12, 3),
+    new Vector3(13, 12, 8),
+    new Vector3(8, 12, 13)
+  ]
   marginPilones = 3
   theTourniquette: Entity
   teleporter: Entity
@@ -49,29 +55,21 @@ class Game implements ISystem {
     this.theTourniquette = new TheTourniquette(new BoxShape(), new Transform({
       //position: new Vector3(8, 13, 8),
       position: new Vector3(8, 12.5, 8),
-      scale:  new Vector3(12.5, 0.2, 0.01)
+      scale:  new Vector3(12.5, 0.2, 0.01),
+      rotation: Quaternion.Euler(0,45,0)
     }) )
 
   }
 
   createThePilones(){
     const scale = new Vector3(1.5, 0.2, 1.5)
-    this.pilones.push(new ThePilones(new BoxShape(), new Transform({
-        position: new Vector3(3, 12, 8),
+    this.gameSpots.forEach(gameSpot => {
+      this.pilones.push(new ThePilones(new BoxShape(), new Transform({
+        position: gameSpot,
         scale
       }) ))
-    this.pilones.push(new ThePilones(new BoxShape(), new Transform({
-      position: new Vector3(8, 12, 3),
-      scale
-    }) ))
-    this.pilones.push(new ThePilones(new BoxShape(), new Transform({
-      position: new Vector3(13, 12, 8),
-      scale
-    }) ))
-    this.pilones.push(new ThePilones(new BoxShape(), new Transform({
-      position: new Vector3(8, 12, 13),
-      scale
-    }) ))
+    })
+
   }
 
   createTeleporter(){
@@ -111,9 +109,15 @@ class Game implements ISystem {
 
   }
 
-  start(){
+  start(playersID : []){
 
-    log('youhou')
+    log('Hello', playersID)
+    movePlayerTo(this.gameSpots[playersID.indexOf(this.userId)].add(new Vector3(0, 1, 0)), { x: 8, y: 13, z: 8 })
+
+    this.theTourniquette.addComponent(new utils.Delay(500, () => {
+      this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
+    }))
+
   }
 
   async joinSocketsServer() {
@@ -165,7 +169,7 @@ class Game implements ISystem {
           break
         }
         case 'START': {
-          this.start()
+          this.start(parsed.data.playersId)
           break
         }
         case 'USER_LEFT': {
