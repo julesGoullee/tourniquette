@@ -126,8 +126,8 @@ class Game implements ISystem {
     log(`You are in the realm: `, realm.displayName)
 
     const userData = await getUserData()
-    this.userId = userData.displayName
-    log(`You are: `, userData.displayName)
+    this.userId = userData.userId
+    log(`You are: `, userData.userId)
 
     this.socket = new WebSocket(
       `${this.webSocketUrl}/broadcast/${realm.displayName}`

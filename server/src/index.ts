@@ -68,7 +68,9 @@ class User {
           if(!this.id){
 
             this.id = parsed.data.userId
+
           }
+
           this.room.playerReady(this)
 
           break
