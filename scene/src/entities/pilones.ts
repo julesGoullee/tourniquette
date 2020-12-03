@@ -7,11 +7,14 @@ export class ThePilones extends Entity {
     super()
     this.addComponent(model)
     model.withCollisions = true
+
+    const myMaterial = new Material()
+    myMaterial.albedoColor = new Color4(0, 0, 0, 0)
+    myMaterial.castShadows = false
+    this.addComponent(myMaterial)
+
+
     this.addComponent(transform)
-    //this.addComponent(new utils.Interval(500, () => {
-      //this.rotateAngle += 10
-      //this.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotateAngle, 0) ) )
-    //}))
 
     engine.addEntity(this)
 
