@@ -228,7 +228,7 @@ class Room {
     }
 
     this.isPlaying = true
-    const usersPlaying = this.queueUsersReady.splice( 0, CONFIG.MAX_PLAYERS_COUNT)
+    const usersPlaying = this.queueUsersReady.splice( 0, CONFIG.MAX_PLAYERS_COUNT + 1)
 
     usersPlaying.forEach(oneUser => {
       oneUser.isPlaying = true

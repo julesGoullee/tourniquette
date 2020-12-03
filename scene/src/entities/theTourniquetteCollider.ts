@@ -1,12 +1,10 @@
-import { movePlayerTo } from '@decentraland/RestrictedActions'
+export class TheTourniquetteCollider extends Entity {
 
-export class Teleporter extends Entity {
-
-    constructor(model: BoxShape, transform: Transform) {
+  constructor(model: BoxShape, transform: Transform) {
 
     super()
     this.addComponent(model)
-    // model.withCollisions = true
+    model.withCollisions = true
 
     const myMaterial = new Material()
     myMaterial.albedoColor = new Color4(0, 0, 0, 0)
@@ -15,7 +13,6 @@ export class Teleporter extends Entity {
 
     this.addComponent(transform)
     engine.addEntity(this)
-
   }
 
 }
