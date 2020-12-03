@@ -312,6 +312,13 @@ class Room {
 
   userFallOut(user: User){
 
+    if(!this.isPlaying){
+
+      console.log(`Room: userFallOut error not playing ${user.id}`)
+      return false
+
+    }
+
     user.fallenOut = true
 
     this.users.forEach( (oneUser: User) => {
