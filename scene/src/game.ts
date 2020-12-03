@@ -12,6 +12,7 @@ import { TheTourniquetteCollider } from './entities/theTourniquetteCollider'
 import { ThePilones } from './entities/pilones'
 import { Teleporter } from './entities/teleporter'
 import { XmasBall } from './entities/xmasBall'
+import { AvatarFreezeBox } from './entities/avatarFreezeBox'
 
 
 class Game implements ISystem {
@@ -19,7 +20,6 @@ class Game implements ISystem {
   webSocketUrl = 'ws://192.168.100.4:13370'
   socket: WebSocket
   userId: string
-  currentPosition = Vector3.Zero()
   camera: Camera = Camera.instance
   isPlaying = false
   fallenOut = false
@@ -245,10 +245,30 @@ class Game implements ISystem {
 
     }
 
-    movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 1, 0)), { x: 8, y: 12, z: 8 })
+    movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: 8, y: 15, z: 8 })
     // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
 
+    const avatarFreezeBox1 = new AvatarFreezeBox(new BoxShape(), new Transform({
+      position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
+      scale: new Vector3(1, 10, 2)
+    }) )
+    const avatarFreezeBox2 = new AvatarFreezeBox(new BoxShape(), new Transform({
+      position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
+      scale: new Vector3(1, 10, 2)
+    }) )
+    const avatarFreezeBox3 = new AvatarFreezeBox(new BoxShape(), new Transform({
+      position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),
+      scale: new Vector3(2, 10, 1)
+    }) )
+    const avatarFreezeBox4 = new AvatarFreezeBox(new BoxShape(), new Transform({
+      position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
+      scale: new Vector3(2, 10, 1)
+    }) )
     this.theTourniquette.addComponent(new utils.Delay(2000, () => {
+      engine.removeEntity(avatarFreezeBox1)
+      engine.removeEntity(avatarFreezeBox2)
+      engine.removeEntity(avatarFreezeBox3)
+      engine.removeEntity(avatarFreezeBox4)
       this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
       this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
       this.isPlaying = true
