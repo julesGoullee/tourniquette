@@ -21,6 +21,8 @@ class Game implements ISystem {
   socket: WebSocket
   userId: string
   camera: Camera = Camera.instance
+  canvas: UICanvas
+  endGameText: UIText
   isPlaying = false
   fallenOut = false
 
@@ -48,7 +50,11 @@ class Game implements ISystem {
     this.createThePilones()
     this.createTeleporter()
     // this.createAvatarHitbox()
-    this.joinSocketsServer().catch(error => log('error join socket server', error) )
+    this.joinSocketsServer().catch(error => {
+      log('error join socket server', error)
+      this.onSocketFailed()
+    })
+    this.canvas = new UICanvas()
 
   }
 
@@ -228,8 +234,11 @@ class Game implements ISystem {
   //   )
   // }
 
-  start(playersId : []){
+  start(playersId: [string]){
 
+    if(this.endGameText){
+      this.endGameText.value = ''
+    }
     const userPosition = playersId.indexOf(this.userId as never)
     this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
     if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
@@ -277,6 +286,48 @@ class Game implements ISystem {
 
   }
 
+  endGame(userWinner: string){
+
+    if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
+
+      this.theTourniquette.getComponent(utils.KeepRotatingComponent).stop()
+      this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
+
+    }
+
+    if(this.theTourniquetteCollider.hasComponent(utils.KeepRotatingComponent) ){
+
+      this.theTourniquetteCollider.getComponent(utils.KeepRotatingComponent).stop()
+      this.theTourniquetteCollider.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
+
+    }
+
+    if(this.isPlaying){
+
+      if(!this.endGameText){
+
+        this.endGameText = new UIText(this.canvas)
+        this.endGameText.font = new Font(Fonts.SanFrancisco)
+        this.endGameText.fontSize = 30
+        this.endGameText.vAlign = 'top'
+        this.endGameText.hAlign = 'center'
+
+      }
+
+      if(userWinner === this.userId){
+
+        this.endGameText.value = 'Congrats, You win'
+
+      } else {
+
+        this.endGameText.value = 'You lose'
+
+      }
+
+    }
+
+  }
+
   async joinSocketsServer() {
 
     const realm = await getCurrentRealm()
@@ -303,10 +354,12 @@ class Game implements ISystem {
 
     this.socket.onclose = (closeEvent) => {
       log('WebSocket: connection close', closeEvent)
+      this.onSocketFailed()
     }
 
     this.socket.onerror = (event) => {
       log('WebSocket: connection error', event)
+      this.onSocketFailed()
     }
 
     this.socket.onmessage = (event) => {
@@ -329,21 +382,7 @@ class Game implements ISystem {
           break
         }
         case 'END_GAME': {
-
-          if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
-
-            this.theTourniquette.getComponent(utils.KeepRotatingComponent).stop()
-            this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
-
-          }
-
-          if(this.theTourniquetteCollider.hasComponent(utils.KeepRotatingComponent) ){
-
-            this.theTourniquetteCollider.getComponent(utils.KeepRotatingComponent).stop()
-            this.theTourniquetteCollider.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
-
-          }
-
+          this.endGame(parsed.data.userWinner)
           break
         }
         case 'FALLEN_OUT': {
@@ -355,6 +394,11 @@ class Game implements ISystem {
 
   }
 
+  onSocketFailed(){
+    if(this.teleporter){
+      this.teleporter.getComponent(OnPointerDown).hoverText = 'Connection failed, please reload'
+    }
+  }
 }
 
 const game = new Game()
