@@ -22,7 +22,7 @@ import { setTimeout, ITimeoutClean } from './utils'
 
 class Game implements ISystem {
 
-  webSocketUrl = 'ws://127.0.0.1:8000/'
+  webSocketUrl = 'ws://127.0.0.1:13370'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
   userId: string
