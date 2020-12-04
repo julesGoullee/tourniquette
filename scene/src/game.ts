@@ -1,6 +1,7 @@
 //import * as ui from '../node_modules/@dcl/ui-utils/index'
 import { getCurrentRealm } from '@decentraland/EnvironmentAPI'
 import utils from '../node_modules/decentraland-ecs-utils/index'
+import {Dialog, NPC} from '../node_modules/@dcl/npc-utils/index'
 import {movePlayerTo} from '@decentraland/RestrictedActions'
 import { getUserData } from '@decentraland/Identity'
 
@@ -13,6 +14,7 @@ import { ThePilones } from './entities/pilones'
 import { Teleporter } from './entities/teleporter'
 import { XmasBall } from './entities/xmasBall'
 import { AvatarFreezeBox } from './entities/avatarFreezeBox'
+// import { lutinSpeaks } from 'entities/dialog'
 
 
 class Game implements ISystem {
@@ -49,13 +51,13 @@ class Game implements ISystem {
     this.createTheTourniquette()
     this.createThePilones()
     this.createTeleporter()
+    this.createLutin()
     // this.createAvatarHitbox()
     this.joinSocketsServer().catch(error => {
       log('error join socket server', error)
       this.onSocketFailed()
     })
     this.canvas = new UICanvas()
-
   }
 
   // createSanta(){
@@ -86,6 +88,65 @@ class Game implements ISystem {
 
 
   // }
+
+  createLutin(){
+
+    let isEndDialog = false
+    const lutinSpeaks: Dialog[] = [
+      {
+        text: `Welcome to the wonderful place of Santaland`,
+        // triggeredByNext: () => {
+        // lutin.playAnimation('sadIdle', true)
+        // }
+      },
+      {
+        text: `We have a crazy problem this year...`,
+      },
+      {
+        text: `My pixie friends and I haven't been able to make a decision and chose the Santa for this year.`,
+      },
+      {
+        text: `No one fits our requirements...`,
+      },
+      {
+        text: `I am sure you can win the competition, let's have a try upstairs. Take the stairs and click on the fireplace to start.`,
+      },
+      {
+        text: `GoodLuck !`,
+        isEndOfDialog: true,
+        triggeredByNext: () => {
+          isEndDialog = true
+          log('trigger by next')
+        }
+      },
+    ]
+
+    let lutin = new NPC(
+      { position: new Vector3(9, 1, 15.5) },
+      'models/lutin.glb',
+      () => {
+        if(!isEndDialog){
+          lutin.talk(lutinSpeaks, 0)
+        }
+        // lutin.playAnimation('dancingJoy', true)
+      },
+      {
+        // idleAnim : 'sadIdle',
+        faceUser : true,
+        portrait: { path: 'images/lutin.png', height: 256, width: 256 },
+        darkUI: true,
+        coolDownDuration: 3,
+        hoverText: 'CHAT',
+        onlyExternalTrigger: false,
+        reactDistance: 5,
+        continueOnWalkAway: false,
+        onWalkAway: () => {
+          log('walked away')
+        },
+      }
+    )
+
+  }
 
   playerFallOut(){
 
