@@ -98,9 +98,9 @@ class Game implements ISystem {
     const lutinSpeaks: Dialog[] = [
       {
         text: `Welcome to the wonderful place of Santaland`,
-        // triggeredByNext: () => {
-        // lutin.playAnimation('sadIdle', true)
-        // }
+        triggeredByNext: () => {
+        lutin.playAnimation('sadIdle')
+        }
       },
       {
         text: `We have a crazy problem this year...`,
@@ -112,7 +112,13 @@ class Game implements ISystem {
         text: `No one fits our requirements...`,
       },
       {
-        text: `I am sure you can win the competition, let's have a try upstairs. Take the stairs and click on the fireplace to start.`,
+        text: `I am sure you can win the competition, let's have a try!`,
+        triggeredByNext: () => {
+        lutin.playAnimation('pointing', true)
+        }
+      },
+      {
+        text: `Take the stairs and click on the fireplace to start.`,
       },
       {
         text: `GoodLuck !`,
@@ -125,16 +131,17 @@ class Game implements ISystem {
     ]
 
     const lutin = new NPC(
-      { position: new Vector3(9, 1, 15.5) },
+      { position: new Vector3(6, 1, 15) },
       'models/lutin.glb',
       () => {
         if(!isEndDialog){
           lutin.talk(lutinSpeaks, 0)
+          lutin.playAnimation('dancingJoy', true)
         }
-        // lutin.playAnimation('dancingJoy', true)
+
       },
       {
-        // idleAnim : 'sadIdle',
+        idleAnim : 'sadIdle',
         faceUser : true,
         portrait: { path: 'images/lutin.png', height: 256, width: 256 },
         darkUI: true,
