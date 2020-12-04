@@ -97,6 +97,10 @@ class User {
 
           this.room.hit(this)
           break
+
+        case 'HIT_SNOW_BALL':
+          this.room.hitSnowBall(this, parsed.data)
+          break
       }
 
     })
@@ -401,6 +405,23 @@ class Room {
       }
 
     })
+  }
+
+  hitSnowBall(user: User, data: any){
+
+    this.users.forEach( (oneUser: User) => {
+
+      if(oneUser.ws.readyState === WebSocket.OPEN && oneUser !== user){
+
+        oneUser.ws.send(JSON.stringify({
+          type: 'HIT_SNOW_BALL',
+          data: Object.assign(data, { userId: user.id })
+        }) )
+
+      }
+
+    })
+
   }
 
 }

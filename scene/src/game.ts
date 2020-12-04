@@ -17,6 +17,8 @@ import { AvatarFreezeBox } from './entities/avatarFreezeBox'
 // import { lutinSpeaks } from 'entities/dialog'
 import { SnowSystem } from './modules/snow'
 import { setTimeout, ITimeoutClean } from './utils'
+import { SnowBallHit } from './entities/snowBallHit'
+import { SnowBall } from './entities/snowBall'
 // import { Kdo } from './entities/kdo'
 
 
@@ -27,11 +29,21 @@ class Game implements ISystem {
   socket: WebSocket
   userId: string
   camera: Camera = Camera.instance
+  input = Input.instance
   canvas: UICanvas
   endGameText: UIText
   isPlaying = false
   fallenOut = false
   hitAllowed = false
+
+  // physics
+  world: CANNON.World
+  fixedTimeStep = 1.0 / 60.0
+  maxSubSteps = 3
+  ballPhysicsMaterial: CANNON.Material
+  groundBody: CANNON.Body
+  forwardVector = Vector3.Forward().rotate(Camera.instance.rotation)
+  vectorScale = 75
 
   gameSpots: Vector3[] = [
     new Vector3(3, 12, 8),
@@ -43,6 +55,7 @@ class Game implements ISystem {
   // ground: Entity
   xmasBall: Entity
   pilones: Entity[] = []
+  snowBalls: SnowBallHit[] = []
   theTourniquette: Entity
   theTourniquetteCollider: Entity
   teleporter: Entity
@@ -57,14 +70,16 @@ class Game implements ISystem {
     this.createTheTourniquette()
     this.createThePilones()
     this.createTeleporter()
-    this.createLutin()
-    // this.createAvatarHitbox()
+    this.createPhysicsWorld()
     this.joinSocketsServer().catch(error => {
       log('error join socket server', error)
       this.onSocketFailed()
     })
     this.canvas = new UICanvas()
+    this.listenSnowBallHit()
     // this.createKdo()
+    // this.createLutin()
+    // this.createAvatarHitbox()
   }
 
   // createKdo(){
@@ -117,6 +132,84 @@ class Game implements ISystem {
 
 
   // }
+
+  listenSnowBallHit(){
+    this.input.subscribe('BUTTON_DOWN', ActionButton.POINTER, false, (e) => {
+
+      if(!this.userId || !this.camera){
+        return false
+      }
+      const inputVector = this.forwardVector.clone()
+      const position = this.camera.position.clone()
+      const rotation = this.camera.rotation.clone()
+
+      if(this.socket && this.socket.readyState === WebSocket.OPEN){
+
+        this.socket.send(
+          JSON.stringify({
+            type: 'HIT_SNOW_BALL',
+            data: {
+              inputVector,
+              position,
+              rotation
+            },
+          })
+        )
+
+      }
+
+      this.createBall(this.userId, new Transform({
+        position,
+        rotation,
+        scale: new Vector3(0.1, 0.1, 0.1)
+      }), inputVector)
+    })
+
+  }
+
+  createPhysicsWorld(){
+
+    this.world = new CANNON.World()
+    this.world.allowSleep = true
+    this.world.gravity.set(0, -9.82, 0) // m/s²
+    // this.world.broadphase = new CANNON.NaiveBroadphase()
+    // this.world.defaultContactMaterial.contactEquationStiffness = 1e8;
+    // this.world.defaultContactMaterial.contactEquationRelaxation = 10;
+    // this.world.quatNormalizeFast = true;
+    // this.world.quatNormalizeSkip = 8;
+    // this.world.solver.iterations = 10;
+
+    const groundPhysicsMaterial = new CANNON.Material('groundMaterial')
+    const groundPhysicsContactMaterial = new CANNON.ContactMaterial(
+      groundPhysicsMaterial,
+      groundPhysicsMaterial,
+      {
+        friction: 0.5,
+        restitution: 0.33,
+      }
+    )
+    this.world.addContactMaterial(groundPhysicsContactMaterial)
+
+    this.groundBody = new CANNON.Body({
+      mass: 0,
+      shape: new CANNON.Plane(),
+      material: groundPhysicsMaterial
+    })
+    this.groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2) // Reorient ground plane to be in the y-axis
+    this.world.addBody(this.groundBody)
+
+    this.ballPhysicsMaterial = new CANNON.Material('ballMaterial')
+    const ballPhysicsContactMaterial = new CANNON.ContactMaterial(
+      this.groundBody.material,
+      this.ballPhysicsMaterial,
+      {
+        friction: 0.9,
+        restitution: 0.2,
+      }
+    )
+    this.world.addContactMaterial(ballPhysicsContactMaterial)
+
+  }
 
   createLutin(){
 
@@ -256,28 +349,121 @@ class Game implements ISystem {
 
     log('playerFallOut')
     this.fallenOut = true
-    this.socket.send(JSON.stringify({
-      type: 'FALLEN_OUT',
-      data: {}
-    }) )
 
+    if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+
+      this.socket.send(JSON.stringify({
+        type: 'FALLEN_OUT',
+        data: {}
+      }) )
+
+    }
   }
 
   update(dt: number): void {
 
-    if(this.isPlaying && !this.fallenOut && (
+    if (this.isPlaying && !this.fallenOut && (
       this.camera.position.y < 11 ||
       this.camera.position.x < 0 ||
       this.camera.position.x > 16 ||
       this.camera.position.z > 16 ||
       this.camera.position.z < 0
-    ) ){
+    )) {
 
       this.playerFallOut()
 
     }
 
-    // if(this.santa){
+    this.forwardVector = Vector3.Forward().rotate(Camera.instance.rotation)
+
+    this.world.step(this.fixedTimeStep, dt, this.maxSubSteps)
+    this.snowBalls.forEach((snowBall) => {
+
+      const transform = snowBall.getComponent(Transform)
+
+      if (!transform.position.equals(new Vector3(snowBall.body.position.x, snowBall.body.position.y, snowBall.body.position.z)) || !transform.rotation.equals(new Quaternion(snowBall.body.quaternion.x, snowBall.body.quaternion.y, snowBall.body.quaternion.z, snowBall.body.quaternion.w))) {
+
+        transform.position.copyFrom(new Vector3(snowBall.body.position.x, snowBall.body.position.y, snowBall.body.position.z))
+        transform.rotation.copyFrom(new Quaternion(snowBall.body.quaternion.x, snowBall.body.quaternion.y, snowBall.body.quaternion.z, snowBall.body.quaternion.w))
+
+      }
+
+    })
+  }
+
+  createBall(userId: string, transform: Transform, inputVector: Vector3){
+
+    const ball = new SnowBall(new SphereShape(), transform, this.world, userId, this.ballPhysicsMaterial)
+
+    ball.body.wakeUp()
+    ball.body.applyImpulse(
+      new CANNON.Vec3(
+        inputVector.x * this.vectorScale,
+        inputVector.y * this.vectorScale,
+        inputVector.z * this.vectorScale
+      ),
+      new CANNON.Vec3(
+        ball.body.position.x,
+        ball.body.position.y,
+        ball.body.position.z
+      )
+    )
+
+    this.snowBalls.forEach(otherBall => {
+
+      const snowBallPhysicsContactMaterial = new CANNON.ContactMaterial(
+        otherBall.body.material,
+        ball.body.material,
+        {
+          friction: 0.4,
+          restitution: 0.75,
+        }
+      )
+      this.world.addContactMaterial(snowBallPhysicsContactMaterial)
+
+    })
+
+    ball.addComponent(new utils.Delay(4000, () => {
+
+      this.world.removeBody(ball.body)
+      engine.removeEntity(ball)
+      this.snowBalls = this.snowBalls.filter(oneSnowBall => oneSnowBall !== ball)
+
+    }) )
+
+    if(this.userId !== userId){
+
+      ball.addComponent(
+        new utils.TriggerComponent(
+          new utils.TriggerBoxShape(new Vector3(0.2, 0.2, 0.2), Vector3.Zero() ),
+          null, null, null, null,
+          () => {
+            log('enter')
+            const position = ball.getComponent(Transform).position.clone().subtract(new Vector3(0, 1, 0))
+            const rotation = ball.getComponent(Transform).rotation.clone().subtract(Quaternion.Euler(0, -45, 0) )
+            const snowHit = new SnowBallHit(new BoxShape(), new Transform({
+              position,
+              rotation,
+              scale: new Vector3(0.5, 1, 0.1)
+            }))
+            snowHit.addComponent(new utils.MoveTransformComponent(position, this.camera.position, 1) )
+            snowHit.addComponent(new utils.Delay(1000, () => {
+              engine.removeEntity(snowHit)
+            }) )
+
+          },
+          () => {}, false
+        )
+      )
+
+    }
+
+    this.snowBalls.push(ball)
+
+    log('Fire snow ball')
+  }
+
+  // if(this.santa){
     //   if(this.currentPosition.equals(Camera.instance.position) ){
     //
     //     this.santa.playIdle()
@@ -302,8 +488,6 @@ class Game implements ISystem {
     //   }
     //
     // }
-
-  }
 
   // createGround(){
   //   this.ground = new Ground(new GLTFShape('models/FloorBaseGrass.glb'), new Transform({
@@ -343,10 +527,14 @@ class Game implements ISystem {
 
           }, 2 * 1000)
           log('theTourniquetteCollider clicked')
-          this.socket.send(JSON.stringify({
-            type: 'HIT',
-            data: {}
-          }) )
+          if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+
+            this.socket.send(JSON.stringify({
+              type: 'HIT',
+              data: {}
+            }) )
+
+          }
         }
       }, {
         hoverText: 'Hit',
@@ -392,14 +580,13 @@ class Game implements ISystem {
             // this.createSanta()
           // }
 
-          if(!this.socket){
-            log('Error socket not connected')
-            return false
+          if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+
+            this.socket.send(JSON.stringify({
+              type: 'START',
+              data: {}
+            }))
           }
-          this.socket.send(JSON.stringify({
-            type: 'START',
-            data: {}
-          }) )
 
         },
         { hoverText: 'Start' }
@@ -470,8 +657,8 @@ class Game implements ISystem {
       engine.removeEntity(avatarFreezeBox2)
       engine.removeEntity(avatarFreezeBox3)
       engine.removeEntity(avatarFreezeBox4)
-      this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
-      this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
+      // this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
+      // this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
       this.isPlaying = true
       this.fallenOut = false
       this.hitAllowed = true
@@ -538,12 +725,17 @@ class Game implements ISystem {
 
     this.socket.onopen = (event) => {
       log('WebSocket: connection open', event)
-      this.socket.send(JSON.stringify({
-        type: 'USER_ID',
-        data: {
-          userId: this.userId
-        }
-      }) )
+
+      if(this.socket && this.socket.readyState === WebSocket.OPEN){
+
+        this.socket.send(JSON.stringify({
+          type: 'USER_ID',
+          data: {
+            userId: this.userId
+          }
+        }) )
+
+      }
 
     }
 
@@ -564,12 +756,17 @@ class Game implements ISystem {
 
       switch (parsed.type){
         case 'PING': {
-          this.socket.send(JSON.stringify({
-            type: 'PONG',
-            data: {
-              time: Date.now()
-            }
-          }) )
+
+          if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+
+            this.socket.send(JSON.stringify({
+              type: 'PONG',
+              data: {
+                time: Date.now()
+              }
+            }))
+
+          }
           break
         }
         case 'START': {
@@ -581,6 +778,16 @@ class Game implements ISystem {
           break
         }
         case 'FALLEN_OUT': {
+          break
+        }
+        case 'HIT_SNOW_BALL': {
+
+          this.createBall(parsed.data.userId, new Transform({
+            position: new Vector3(parsed.data.position.x, parsed.data.position.y, parsed.data.position.z),
+            rotation: new Quaternion(parsed.data.rotation.x, parsed.data.rotation.y, parsed.data.rotation.z, parsed.data.rotation.w),
+            scale: new Vector3(0.1, 0.1, 0.1)
+          }), new Vector3(parsed.data.inputVector.x, parsed.data.inputVector.y, parsed.data.inputVector.z) )
+
           break
         }
         case 'CHANGE_DIRECTION': {

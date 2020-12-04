@@ -17,5 +17,9 @@
     "decentraland": "^3.4.5-20201009170559.commit-fa9f1c1",
     "decentraland-ecs": "^6.6.2-20201202140920.commit-ea5410b",
     "decentraland-ecs-utils": "^1.1.9"
+  },
+  "dependencies": {
+    "@types/cannon": "^0.1.5",
+    "cannon": "github:schteppe/cannon.js"
   }
 }
