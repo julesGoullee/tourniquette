@@ -140,6 +140,8 @@ class Room {
   users: User[] = []
   queueUsersReady: User[] = []
   isPlaying = false
+  timeoutChangeDirection: NodeJS.Timeout | undefined
+  currentDirection = '+'
 
   constructor(id: string){
 
@@ -228,6 +230,7 @@ class Room {
     }
 
     this.isPlaying = true
+    this.currentDirection = '+'
     const usersPlaying = this.queueUsersReady.splice( 0, CONFIG.MAX_PLAYERS_COUNT + 1)
 
     usersPlaying.forEach(oneUser => {
@@ -249,6 +252,35 @@ class Room {
 
     })
 
+    this.changeDirection()
+
+  }
+
+  changeDirection(){
+
+    const time = ( parseInt( (Math.random() * 20).toString() ) + 10) * 1000
+    this.timeoutChangeDirection = setTimeout( () => {
+
+      const sign = this.currentDirection === '+' ? '-' : '+'
+      this.currentDirection = sign
+
+      this.users.forEach(oneUser => {
+
+        if(oneUser.ws.readyState === WebSocket.OPEN && oneUser.id){
+
+          oneUser.ws.send(JSON.stringify({
+            type: 'CHANGE_DIRECTION',
+            data: { sign }
+          }) )
+
+        }
+
+      })
+
+      this.changeDirection()
+
+    }, time)
+
   }
 
   playerReady(user: User){
@@ -263,6 +295,14 @@ class Room {
   }
 
   endGame(){
+
+    this.isPlaying = false
+
+    if(this.timeoutChangeDirection){
+
+      clearTimeout(this.timeoutChangeDirection)
+
+    }
 
     const userWinner = this.users.filter(oneUser => oneUser.isPlaying && !oneUser.fallenOut)
 
@@ -280,7 +320,6 @@ class Room {
 
     }
 
-    this.isPlaying = false
     this.users.forEach(oneUser => {
 
       if(oneUser.isPlaying){

@@ -16,11 +16,13 @@ import { XmasBall } from './entities/xmasBall'
 import { AvatarFreezeBox } from './entities/avatarFreezeBox'
 // import { lutinSpeaks } from 'entities/dialog'
 import { SnowSystem } from './modules/snow'
+import { setTimeout, ITimeoutClean } from './utils'
 
 
 class Game implements ISystem {
 
   webSocketUrl = 'ws://192.168.100.4:13370'
+  timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
   userId: string
   camera: Camera = Camera.instance
@@ -122,7 +124,7 @@ class Game implements ISystem {
       },
     ]
 
-    let lutin = new NPC(
+    const lutin = new NPC(
       { position: new Vector3(9, 1, 15.5) },
       'models/lutin.glb',
       () => {
@@ -221,7 +223,7 @@ class Game implements ISystem {
     this.theTourniquetteCollider = new TheTourniquetteCollider(new BoxShape(), new Transform({
       //position: new Vector3(8, 13, 8),
       position: new Vector3(8, 12.5, 8),
-      scale:  new Vector3(14.5, 0.2, 0.01),
+      scale: new Vector3(12.5, 0.3, 0.01),
       rotation: Quaternion.Euler(0,45,0)
     }) )
 
@@ -450,6 +452,14 @@ class Game implements ISystem {
         case 'FALLEN_OUT': {
           break
         }
+        case 'CHANGE_DIRECTION': {
+
+          const rotation = parsed.data.sign === '+' ? 100 : -100
+          this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, rotation, 0) ) )
+          this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, rotation, 0) ) )
+
+          break
+        }
       }
 
     }
@@ -457,8 +467,28 @@ class Game implements ISystem {
   }
 
   onSocketFailed(){
+
     if(this.teleporter){
-      this.teleporter.getComponent(OnPointerDown).hoverText = 'Connection failed, please reload'
+      this.teleporter.getComponent(OnPointerDown).hoverText = 'Connection failed, try later'
+    }
+
+    if(!this.timeoutReconnectWebSocket) {
+
+      this.timeoutReconnectWebSocket = setTimeout(() => {
+
+        log('retry join socket server', error)
+        this.joinSocketsServer()
+          .then(() => {
+            log('socker server reconnected')
+            this.timeoutReconnectWebSocket = null
+          })
+          .catch(error => {
+            log('error join socket server', error)
+            this.timeoutReconnectWebSocket = null
+            this.onSocketFailed()
+          })
+
+      }, 5000)
     }
   }
 }

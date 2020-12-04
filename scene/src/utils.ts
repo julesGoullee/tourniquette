@@ -1,7 +1,7 @@
 import { Delay } from '../node_modules/decentraland-ecs-utils/timer/component/delay'
 import { Interval } from '../node_modules/decentraland-ecs-utils/timer/component/interval'
 
-interface ITimeoutClean {
+export interface ITimeoutClean {
   clearTimeout(): void
 }
 
