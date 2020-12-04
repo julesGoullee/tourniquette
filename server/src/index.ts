@@ -13,6 +13,7 @@ class User {
   room: Room
   id?: string
   isPlaying = false
+  hitAllow = false
   fallenOut = false
   intervalAlive?: NodeJS.Timeout
   wsIsAlive = true
@@ -92,6 +93,10 @@ class User {
           this.room.userFallOut(this)
           break
 
+        case 'HIT':
+
+          this.room.hit(this)
+          break
       }
 
     })
@@ -235,6 +240,7 @@ class Room {
 
     usersPlaying.forEach(oneUser => {
       oneUser.isPlaying = true
+      oneUser.hitAllow = true
     })
 
     this.users.forEach( (oneUser: User) => {
@@ -251,35 +257,6 @@ class Room {
       }
 
     })
-
-    this.changeDirection()
-
-  }
-
-  changeDirection(){
-
-    const time = ( parseInt( (Math.random() * 20).toString() ) + 10) * 1000
-    this.timeoutChangeDirection = setTimeout( () => {
-
-      const sign = this.currentDirection === '+' ? '-' : '+'
-      this.currentDirection = sign
-
-      this.users.forEach(oneUser => {
-
-        if(oneUser.ws.readyState === WebSocket.OPEN && oneUser.id){
-
-          oneUser.ws.send(JSON.stringify({
-            type: 'CHANGE_DIRECTION',
-            data: { sign }
-          }) )
-
-        }
-
-      })
-
-      this.changeDirection()
-
-    }, time)
 
   }
 
@@ -326,6 +303,7 @@ class Room {
 
         oneUser.isPlaying = false
         oneUser.fallenOut = false
+        oneUser.hitAllow = false
         this.queueUsersReady.push(oneUser)
 
       }
@@ -351,7 +329,7 @@ class Room {
 
   userFallOut(user: User){
 
-    if(!this.isPlaying){
+    if(!this.isPlaying || !user.isPlaying){
 
       console.log(`Room: userFallOut error not playing ${user.id}`)
       return false
@@ -359,6 +337,7 @@ class Room {
     }
 
     user.fallenOut = true
+    user.hitAllow = false
 
     this.users.forEach( (oneUser: User) => {
 
@@ -381,6 +360,47 @@ class Room {
 
     }
 
+  }
+
+  hit(user: User){
+
+    if(!this.isPlaying || !user.isPlaying){
+
+      console.log(`Room: user hit error not playing ${user.id}`)
+      return false
+
+    }
+    if(!user.hitAllow){
+
+      console.log(`Room: user hit not allowed ${user.id}`)
+      return false
+
+    }
+
+    const sign = this.currentDirection === '+' ? '-' : '+'
+    this.currentDirection = sign
+    user.hitAllow = false
+
+    setTimeout( () => {
+
+      user.hitAllow = true
+
+    }, 2 * 1000)
+
+    console.log(`Room: user hit ${user.id}`)
+
+    this.users.forEach( (oneUser: User) => {
+
+      if(oneUser.ws.readyState === WebSocket.OPEN){
+
+        oneUser.ws.send(JSON.stringify({
+          type: 'CHANGE_DIRECTION',
+          data: { sign }
+        }) )
+
+      }
+
+    })
   }
 
 }
