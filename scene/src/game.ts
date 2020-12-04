@@ -15,6 +15,7 @@ import { Teleporter } from './entities/teleporter'
 import { XmasBall } from './entities/xmasBall'
 import { AvatarFreezeBox } from './entities/avatarFreezeBox'
 // import { lutinSpeaks } from 'entities/dialog'
+import { SnowSystem } from './modules/snow'
 
 
 class Game implements ISystem {
@@ -464,3 +465,6 @@ class Game implements ISystem {
 
 const game = new Game()
 engine.addSystem(game)
+
+const bounds = new Vector4(3, 13, 5, 16)
+engine.addSystem(new SnowSystem(bounds))
