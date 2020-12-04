@@ -20,6 +20,7 @@ import { setTimeout, ITimeoutClean } from './utils'
 import { SnowBallHit } from './entities/snowBallHit'
 import { SnowBall } from './entities/snowBall'
 // import { Kdo } from './entities/kdo'
+import { countDownBox } from './entities/countDown'
 
 
 class Game implements ISystem {
@@ -59,6 +60,7 @@ class Game implements ISystem {
   theTourniquette: Entity
   theTourniquetteCollider: Entity
   teleporter: Entity
+  countDownBox: countDownBox
   // avatarHitbox: Entity
   // santa: Santa
   // kdo: Kdo
@@ -80,6 +82,8 @@ class Game implements ISystem {
     this.listenSnowBallHit()
     // this.createKdo()
     // this.createAvatarHitbox()
+    this.createCountDown()
+
   }
 
   // createKdo(){
@@ -209,6 +213,10 @@ class Game implements ISystem {
     )
     this.world.addContactMaterial(ballPhysicsContactMaterial)
 
+  }
+
+  createCountDown() {
+    this.countDownBox = new countDownBox(new GLTFShape('models/countDown.glb'))
   }
 
   createLutin(){
@@ -634,6 +642,7 @@ class Game implements ISystem {
     }
 
     movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: 8, y: 15, z: 8 })
+    this.countDownBox.playCountDown()
     // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
 
     const avatarFreezeBox1 = new AvatarFreezeBox(new BoxShape(), new Transform({
@@ -652,13 +661,14 @@ class Game implements ISystem {
       position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
       scale: new Vector3(2, 10, 1)
     }) )
-    this.theTourniquette.addComponent(new utils.Delay(2000, () => {
+
+    this.theTourniquette.addComponent(new utils.Delay(4000, () => {
       engine.removeEntity(avatarFreezeBox1)
       engine.removeEntity(avatarFreezeBox2)
       engine.removeEntity(avatarFreezeBox3)
       engine.removeEntity(avatarFreezeBox4)
-      // this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
-      // this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
+      this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
+      this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
       this.isPlaying = true
       this.fallenOut = false
       this.hitAllowed = true
