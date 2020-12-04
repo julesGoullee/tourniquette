@@ -17,6 +17,7 @@ import { AvatarFreezeBox } from './entities/avatarFreezeBox'
 // import { lutinSpeaks } from 'entities/dialog'
 import { SnowSystem } from './modules/snow'
 import { setTimeout, ITimeoutClean } from './utils'
+// import { Kdo } from './entities/kdo'
 
 
 class Game implements ISystem {
@@ -30,6 +31,7 @@ class Game implements ISystem {
   endGameText: UIText
   isPlaying = false
   fallenOut = false
+  hitAllowed = false
 
   gameSpots: Vector3[] = [
     new Vector3(3, 12, 8),
@@ -45,7 +47,8 @@ class Game implements ISystem {
   theTourniquetteCollider: Entity
   teleporter: Entity
   // avatarHitbox: Entity
-  santa: Santa
+  // santa: Santa
+  // kdo: Kdo
 
   constructor() {
 
@@ -61,7 +64,30 @@ class Game implements ISystem {
       this.onSocketFailed()
     })
     this.canvas = new UICanvas()
+    // this.createKdo()
   }
+
+  // createKdo(){
+  //
+  //   const startPosition = new Vector3(8, 20, 15.5)
+  //   this.kdo = new Kdo(new SphereShape(), new Transform({
+  //     position: startPosition,
+  //     scale: new Vector3(0.5, 0.5, 0.5)
+  //   }) )
+  //   this.kdo.addComponent(
+  //     new OnPointerDown(
+  //       (e) => {
+  //
+  //         log('clicked')
+  //       }, {
+  //         hoverText: 'Open',
+  //         showFeedback: true,
+  //         distance: 5
+  //       })
+  //   )
+  //   this.kdo.addComponent(new utils.MoveTransformComponent(startPosition, new Vector3(startPosition.x, 2, startPosition.z), 10) )
+  //
+  // }
 
   // createSanta(){
 
@@ -229,11 +255,37 @@ class Game implements ISystem {
   createTheTourniquette(){
     this.theTourniquetteCollider = new TheTourniquetteCollider(new BoxShape(), new Transform({
       //position: new Vector3(8, 13, 8),
-      position: new Vector3(8, 12.5, 8),
-      scale: new Vector3(12.5, 0.3, 0.01),
+      position: new Vector3(8, 13, 8),
+      scale: new Vector3(14, 0.5, 0.04),
       rotation: Quaternion.Euler(0,45,0)
     }) )
+    const onPointerDown = new OnPointerDown(
+      (e) => {
 
+        if(this.isPlaying && !this.fallenOut && this.hitAllowed){
+
+          onPointerDown.hoverText = ''
+          onPointerDown.showFeedback = false
+          this.hitAllowed = false
+          setTimeout(() => {
+
+            this.hitAllowed = true
+            onPointerDown.hoverText = 'Hit'
+            onPointerDown.showFeedback = true
+
+          }, 2 * 1000)
+          log('theTourniquetteCollider clicked')
+          this.socket.send(JSON.stringify({
+            type: 'HIT',
+            data: {}
+          }) )
+        }
+      }, {
+        hoverText: 'Hit',
+        showFeedback: true,
+        distance: 4
+      })
+    this.theTourniquetteCollider.addComponent(onPointerDown)
     this.theTourniquette = new TheTourniquette(new GLTFShape('models/sucreDorge.glb'), new Transform({
       //position: new Vector3(8, 13, 8),
       position: new Vector3(8, 12, 8),
@@ -310,6 +362,7 @@ class Game implements ISystem {
     if(this.endGameText){
       this.endGameText.value = ''
     }
+    this.hitAllowed = false
     const userPosition = playersId.indexOf(this.userId as never)
     this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
     if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
@@ -353,6 +406,7 @@ class Game implements ISystem {
       this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
       this.isPlaying = true
       this.fallenOut = false
+      this.hitAllowed = true
     }) )
 
   }
@@ -384,7 +438,9 @@ class Game implements ISystem {
         this.endGameText.hAlign = 'center'
 
       }
-
+      this.hitAllowed = false
+      this.isPlaying = false
+      this.fallenOut = false
       if(userWinner === this.userId){
 
         this.endGameText.value = 'Congrats, You win'
