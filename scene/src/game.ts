@@ -75,10 +75,10 @@ class Game implements ISystem {
       log('error join socket server', error)
       this.onSocketFailed()
     })
+    this.createLutin()
     this.canvas = new UICanvas()
     this.listenSnowBallHit()
     // this.createKdo()
-    // this.createLutin()
     // this.createAvatarHitbox()
   }
 
