@@ -22,7 +22,7 @@ import { setTimeout, ITimeoutClean } from './utils'
 
 class Game implements ISystem {
 
-  webSocketUrl = 'ws://192.168.100.4:13370'
+  webSocketUrl = 'ws://127.0.0.1:8000/'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
   userId: string
@@ -123,28 +123,86 @@ class Game implements ISystem {
     let isEndDialog = false
     const lutinSpeaks: Dialog[] = [
       {
-        text: `Welcome to the wonderful place of Santaland`,
+        text: `Welcome to the wonderful place of Santaland!`,
         triggeredByNext: () => {
-        lutin.playAnimation('sadIdle')
+          lutin.playAnimation('talking', true)
         }
+      },
+      {
+        text: `We are here to save Christmas, do you want to know more ?`,
+        isQuestion: true,
+        buttons: [
+          { label: `Tell me!`,
+            goToDialog: 2,
+            triggeredActions:  () => {
+              lutin.playAnimation('shakingHead', true)
+            }},
+          { label: `No thanks`,
+            goToDialog: 14,
+            triggeredActions:  () => {
+              lutin.playAnimation('sadIdle', true)
+            }
+          },
+        ],
       },
       {
         text: `We have a crazy problem this year...`,
-      },
-      {
-        text: `My pixie friends and I haven't been able to make a decision and chose the Santa for this year.`,
-      },
-      {
-        text: `No one fits our requirements...`,
-      },
-      {
-        text: `I am sure you can win the competition, let's have a try!`,
         triggeredByNext: () => {
-        lutin.playAnimation('pointing', true)
+          lutin.playAnimation('sadIdle', false)
         }
       },
       {
-        text: `Take the stairs and click on the fireplace to start.`,
+        text: `Santa has been captured...`,
+      },
+      {
+        text: `We need your help to bring him back and save Christmas`,
+        triggeredByNext: () => {
+          lutin.playAnimation('talking', true)
+        }
+      },
+      {
+        text: `Would you accept to achieve this mission ?`,
+        isQuestion: true,
+        buttons: [
+          { label: `Of course!`,
+            goToDialog: 6,
+            triggeredActions:  () => {
+              lutin.playAnimation('capuera', false)
+            } },
+
+          { label: `I'm busy`,
+            goToDialog: 14,
+            triggeredActions:  () => {
+              lutin.playAnimation('sadIdle', true)
+            }},
+        ],
+      },
+      {
+        text: `Yihiii, you're amazing !`,
+        triggeredByNext: () => {
+          lutin.playAnimation('pointing', true)
+        }
+      },
+      {
+        text: `Look at this ... to understand the game`,
+      },
+      {
+        text: `First, go in the house upstairs and click on the fireplace`,
+      },
+      {
+        text: `This will start the game`,
+      },
+      {
+        text: `Then, the purpose is to be the last man standing!`,
+      },
+      {
+        text: `To do so, don't fall from your platform`,
+      },
+      {
+        text: `And jump to avoid hitting the sugar cane`,
+      },
+      {
+        text: `You can click on the sugar cane to change its rotation`,
       },
       {
         text: `GoodLuck !`,
@@ -154,6 +212,16 @@ class Game implements ISystem {
           log('trigger by next')
         }
       },
+      {
+        text: `Ok! You can come back to me later`,
+        triggeredByNext: () => {
+          lutin.playAnimation('pointing', true)
+        }
+      },
+      {
+        text: `If you want to help us, take the stairs and click on the fireplace to start.`,
+        isEndOfDialog: true,
+      },
     ]
 
     const lutin = new NPC(
@@ -162,7 +230,7 @@ class Game implements ISystem {
       () => {
         if(!isEndDialog){
           lutin.talk(lutinSpeaks, 0)
-          lutin.playAnimation('dancingJoy', true)
+          lutin.playAnimation('dancingJoy', false)
         }
 
       },
