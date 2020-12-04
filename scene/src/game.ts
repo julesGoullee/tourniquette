@@ -19,6 +19,7 @@ import { SnowSystem } from './modules/snow'
 import { setTimeout, ITimeoutClean } from './utils'
 import { SnowBallHit } from './entities/snowBallHit'
 import { SnowBall } from './entities/snowBall'
+import { SoundSystem } from './modules/sounds'
 // import { Kdo } from './entities/kdo'
 import { countDownBox } from './entities/countDown'
 
@@ -65,6 +66,8 @@ class Game implements ISystem {
   // santa: Santa
   // kdo: Kdo
 
+  soundSystem: SoundSystem
+
   constructor() {
 
     // this.createGround()
@@ -83,7 +86,8 @@ class Game implements ISystem {
     // this.createKdo()
     // this.createAvatarHitbox()
     this.createCountDown()
-
+    this.soundSystem = new SoundSystem()
+    this.soundSystem.backgroundMusic()
   }
 
   // createKdo(){
@@ -662,7 +666,11 @@ class Game implements ISystem {
       scale: new Vector3(2, 10, 1)
     }) )
 
+    this.soundSystem.backgroundMusic(false)
+    this.soundSystem.startGame()
+
     this.theTourniquette.addComponent(new utils.Delay(4000, () => {
+
       engine.removeEntity(avatarFreezeBox1)
       engine.removeEntity(avatarFreezeBox2)
       engine.removeEntity(avatarFreezeBox3)
@@ -671,6 +679,7 @@ class Game implements ISystem {
       this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
       this.isPlaying = true
       this.fallenOut = false
+      this.soundSystem.gameMusic(true)
       this.hitAllowed = true
     }) )
 
@@ -703,9 +712,14 @@ class Game implements ISystem {
         this.endGameText.hAlign = 'center'
 
       }
+
+      this.soundSystem.backgroundMusic(true)
+      this.soundSystem.gameMusic(false)
+
       this.hitAllowed = false
       this.isPlaying = false
       this.fallenOut = false
+
       if(userWinner === this.userId){
 
         this.endGameText.value = 'Congrats, You win'
@@ -713,6 +727,7 @@ class Game implements ISystem {
       } else {
 
         this.endGameText.value = 'You lose'
+        this.soundSystem.failGame()
 
       }
 
@@ -847,3 +862,5 @@ engine.addSystem(game)
 
 const bounds = new Vector4(3, 13, 5, 16)
 engine.addSystem(new SnowSystem(bounds))
+
+engine.addSystem(game.soundSystem);
