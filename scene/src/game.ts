@@ -544,6 +544,7 @@ class Game implements ISystem {
           .then(() => {
             log('socker server reconnected')
             this.timeoutReconnectWebSocket = null
+            this.teleporter.getComponent(OnPointerDown).hoverText = 'Start'
           })
           .catch(error => {
             log('error join socket server', error)
