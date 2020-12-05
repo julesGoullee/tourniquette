@@ -35,7 +35,7 @@ class Game implements ISystem {
   camera: Camera = Camera.instance
   input = Input.instance
   canvas: UICanvas
-  endGameText: UIText
+  gameText: UIText
   isPlaying = false
   fallenOut = false
   hitTourniquetteAllowed = false
@@ -62,7 +62,7 @@ class Game implements ISystem {
   snowBalls: SnowBallHit[] = []
   theTourniquette: Entity
   theTourniquetteCollider: Entity
-  teleporter: Entity
+  teleporter: Teleporter
   countDownBox: countDownBox
   // avatarHitbox: Entity
   // santa: Santa
@@ -90,8 +90,21 @@ class Game implements ISystem {
     this.createCountDown()
     this.soundSystem = new SoundSystem()
     this.soundSystem.backgroundMusic()
+
+    this.createGameText()
+
   }
 
+  createGameText() {
+
+    this.gameText = new UIText(this.canvas)
+    this.gameText.font = new Font(Fonts.SanFrancisco)
+    this.gameText.fontSize = 30
+    this.gameText.vAlign = 'top'
+    this.gameText.hAlign = 'center'
+
+  }
+  /*
   // createKdo(){
   //
   //   const startPosition = new Vector3(8, 20, 15.5)
@@ -113,34 +126,36 @@ class Game implements ISystem {
   //   this.kdo.addComponent(new utils.MoveTransformComponent(startPosition, new Vector3(startPosition.x, 2, startPosition.z), 10) )
   //
   // }
+  */
 
-  // createSanta(){
+  /* createSanta(){
 
-    // this.santa = new Santa(new GLTFShape("models/santa.glb"), new Transform({ position: new Vector3(0, -1, -0.2), scale: new Vector3(1, 1.5, 1)}) )
-    // this.santa.setParent(Attachable.AVATAR)
-    //
-    // // Hide avatars
-    // const hideAvatarsEntity = new Entity()
-    // hideAvatarsEntity.addComponent(new AvatarModifierArea({
-    //   area: {
-    //     box: new Vector3(16, 40, 16)
-    //   },
-    //   modifiers: [AvatarModifiers.HIDE_AVATARS]
-    // }) )
-    // hideAvatarsEntity.addComponent(new Transform({ position: new Vector3(8, 0, 8) }) )
-    // engine.addEntity(hideAvatarsEntity)
+    this.santa = new Santa(new GLTFShape("models/santa.glb"), new Transform({ position: new Vector3(0, -1, -0.2), scale: new Vector3(1, 1.5, 1)}) )
+    this.santa.setParent(Attachable.AVATAR)
 
-    // Create to show Santa avatar
-    // hideAvatarsEntity.addComponent(
-    //   new utils.TriggerComponent(
-    //     new utils.TriggerBoxShape(new Vector3(16, 20, 16), new Vector3(0, 10, 0) ),
-    //     null, null, null, null,
-    //     () => { this.santa.getComponent(Transform).scale.setAll(1) },
-    //     () => { this.santa.getComponent(Transform).scale.setAll(0) }
-    //   )
-    // )
+    // Hide avatars
+    const hideAvatarsEntity = new Entity()
+    hideAvatarsEntity.addComponent(new AvatarModifierArea({
+      area: {
+        box: new Vector3(16, 40, 16)
+      },
+      modifiers: [AvatarModifiers.HIDE_AVATARS]
+    }) )
+    hideAvatarsEntity.addComponent(new Transform({ position: new Vector3(8, 0, 8) }) )
+    engine.addEntity(hideAvatarsEntity)
 
-  // }
+    Create to show Santa avatar
+    hideAvatarsEntity.addComponent(
+      new utils.TriggerComponent(
+        new utils.TriggerBoxShape(new Vector3(16, 20, 16), new Vector3(0, 10, 0) ),
+        null, null, null, null,
+        () => { this.santa.getComponent(Transform).scale.setAll(1) },
+        () => { this.santa.getComponent(Transform).scale.setAll(0) }
+      )
+    )
+
+  }
+*/
 
   listenSnowBallHit(){
     this.input.subscribe('BUTTON_DOWN', ActionButton.POINTER, false, (e) => {
@@ -366,21 +381,6 @@ class Game implements ISystem {
 
   }
 
-  playerFallOut(){
-
-    log('playerFallOut')
-    this.fallenOut = true
-
-    if(this.socket && this.socket.readyState === WebSocket.OPEN) {
-
-      this.socket.send(JSON.stringify({
-        type: 'FALLEN_OUT',
-        data: {}
-      }) )
-
-    }
-  }
-
   update(dt: number): void {
 
     if (this.isPlaying && !this.fallenOut && (
@@ -487,30 +487,30 @@ class Game implements ISystem {
   }
 
   // if(this.santa){
-    //   if(this.currentPosition.equals(Camera.instance.position) ){
-    //
-    //     this.santa.playIdle()
-    //     log('playeidle')
-    //
-    //   } else {
-    //
-    //     if(Camera.instance.position.y > this.currentPosition.y + 0.35){
-    //
-    //       log('###################playejump')
-    //       this.santa.playJump()
-    //
-    //     } else {
-    //
-    //       log('playerunning')
-    //       this.santa.playRunning()
-    //
-    //     }
-    //
-    //     this.currentPosition = Camera.instance.position.clone()
-    //
-    //   }
-    //
-    // }
+  //   if(this.currentPosition.equals(Camera.instance.position) ){
+  //
+  //     this.santa.playIdle()
+  //     log('playeidle')
+  //
+  //   } else {
+  //
+  //     if(Camera.instance.position.y > this.currentPosition.y + 0.35){
+  //
+  //       log('###################playejump')
+  //       this.santa.playJump()
+  //
+  //     } else {
+  //
+  //       log('playerunning')
+  //       this.santa.playRunning()
+  //
+  //     }
+  //
+  //     this.currentPosition = Camera.instance.position.clone()
+  //
+  //   }
+  //
+  // }
 
   // createGround(){
   //   this.ground = new Ground(new GLTFShape('models/FloorBaseGrass.glb'), new Transform({
@@ -545,7 +545,7 @@ class Game implements ISystem {
           setTimeout(() => {
 
             this.hitTourniquetteAllowed = true
-            onPointerDown.hoverText = 'Hit'
+            onPointerDown.hoverText = 'Reverse'
             onPointerDown.showFeedback = true
 
           }, 2 * 1000)
@@ -560,7 +560,7 @@ class Game implements ISystem {
           }
         }
       }, {
-        hoverText: 'Hit',
+        hoverText: 'Reverse',
         showFeedback: true,
         distance: 4
       })
@@ -590,32 +590,20 @@ class Game implements ISystem {
 
   createTeleporter(){
 
-    this.teleporter = new Teleporter(new BoxShape(), new Transform({
-      // position: new Vector3(2, 2, 2),
-      position: new Vector3(8, 6, 7.5),
-      scale: new Vector3(1, 1, 1)
-    }) )
+    this.teleporter = new Teleporter((e) => {
+      // if(!this.santa) {
+      // this.createSanta()
+      // }
 
-    this.teleporter.addComponent(
-      new OnPointerDown(
-        (e) => {
-          // if(!this.santa) {
-            // this.createSanta()
-          // }
+      if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 
-          if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+        this.socket.send(JSON.stringify({
+          type: 'START',
+          data: {}
+        }))
+      }
 
-            this.socket.send(JSON.stringify({
-              type: 'START',
-              data: {}
-            }))
-          }
-
-        },
-        { hoverText: 'Start' }
-      )
-    )
-
+    })
 
   }
 
@@ -637,9 +625,8 @@ class Game implements ISystem {
 
   start(players: [PlayersData] ){
 
-    if(this.endGameText){
-      this.endGameText.value = ''
-    }
+    this.teleporter.gamePlaying(true)
+    this.gameText.value = ''
     this.hitTourniquetteAllowed = false
     this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
     if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
@@ -659,33 +646,31 @@ class Game implements ISystem {
       return player
     })
 
-    if(userPosition === -1){
+    if(userPosition === -1) {
 
       log('User not playing')
       return false
 
-    } else {
-
-      movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: 8, y: 15, z: 8 })
-      // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
-      avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
-        position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
-        scale: new Vector3(1, 10, 2)
-      }) ) )
-      avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
-        position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
-        scale: new Vector3(1, 10, 2)
-      }) ) )
-      avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
-        position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),
-        scale: new Vector3(2, 10, 1)
-      }) ) )
-      avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
-        position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
-        scale: new Vector3(2, 10, 1)
-      }) ) )
-
     }
+
+    movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: 8, y: 15, z: 8 })
+    // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
+    avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+      position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
+      scale: new Vector3(1, 10, 2)
+    }) ) )
+    avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+      position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
+      scale: new Vector3(1, 10, 2)
+    }) ) )
+    avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+      position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),
+      scale: new Vector3(2, 10, 1)
+    }) ) )
+    avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+      position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
+      scale: new Vector3(2, 10, 1)
+    }) ) )
 
     this.countDownBox.playCountDown()
     this.soundSystem.backgroundMusic(false)
@@ -696,19 +681,20 @@ class Game implements ISystem {
       avatarFreezeBoxes.forEach(avatarFreezeBox => engine.removeEntity(avatarFreezeBox) )
       this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
       this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
+
       this.soundSystem.gameMusic(true)
 
-      if(userPosition !== -1){
-        this.isPlaying = true
-        this.fallenOut = false
-        this.hitTourniquetteAllowed = true
-      }
+      this.isPlaying = true
+      this.fallenOut = false
+      this.hitTourniquetteAllowed = true
 
     }) )
 
   }
 
   endGame(userWinner: string){
+
+    this.teleporter.gamePlaying(false)
 
     if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
 
@@ -726,16 +712,6 @@ class Game implements ISystem {
 
     if(this.isPlaying){
 
-      if(!this.endGameText){
-
-        this.endGameText = new UIText(this.canvas)
-        this.endGameText.font = new Font(Fonts.SanFrancisco)
-        this.endGameText.fontSize = 30
-        this.endGameText.vAlign = 'top'
-        this.endGameText.hAlign = 'center'
-
-      }
-
       this.soundSystem.backgroundMusic(true)
       this.soundSystem.gameMusic(false)
 
@@ -745,17 +721,34 @@ class Game implements ISystem {
 
       if(userWinner === this.userId){
 
-        this.endGameText.value = 'Congrats, You win'
+        this.gameText.value = 'Congrats, You won !'
 
-      } else {
+      } else if(userWinner){
 
-        this.endGameText.value = 'You lose'
+        const winner = this.playersInGame.filter(p => p.id === userWinner)[0]
+        this.gameText.value = `${winner.displayName} won the game !`
         this.soundSystem.failGame()
 
       }
 
     }
 
+  }
+
+  playerFallOut(){
+
+    log('playerFallOut')
+    this.fallenOut = true
+    this.gameText.value = 'You lose...'
+
+    if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+
+      this.socket.send(JSON.stringify({
+        type: 'FALLEN_OUT',
+        data: {}
+      }) )
+
+    }
   }
 
   otherPlayerFallenOut(playerId: string){
@@ -821,6 +814,12 @@ class Game implements ISystem {
       log('WebSocket: message', parsed)
 
       switch (parsed.type){
+        case 'HELLO': {
+
+          this.teleporter.gamePlaying(parsed.data.isPlaying)
+          break
+
+        }
         case 'PING': {
 
           if(this.socket && this.socket.readyState === WebSocket.OPEN) {
