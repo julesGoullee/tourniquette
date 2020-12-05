@@ -14,7 +14,8 @@ class User {
   id?: string
   displayName?: string
   isPlaying = false
-  hitAllow = false
+  hitTourniquetteAllowed = false
+  hitSnowBallAllowed = true
   fallenOut = false
   intervalAlive?: NodeJS.Timeout
   wsIsAlive = true
@@ -246,7 +247,7 @@ class Room {
 
     usersPlaying.forEach(oneUser => {
       oneUser.isPlaying = true
-      oneUser.hitAllow = true
+      oneUser.hitTourniquetteAllowed = true
     })
 
     this.users.forEach( (oneUser: User) => {
@@ -311,7 +312,7 @@ class Room {
 
         oneUser.isPlaying = false
         oneUser.fallenOut = false
-        oneUser.hitAllow = false
+        oneUser.hitTourniquetteAllowed = false
         this.queueUsersReady.push(oneUser)
 
       }
@@ -345,7 +346,7 @@ class Room {
     }
 
     user.fallenOut = true
-    user.hitAllow = false
+    user.hitTourniquetteAllowed = false
 
     this.users.forEach( (oneUser: User) => {
 
@@ -378,24 +379,24 @@ class Room {
       return false
 
     }
-    if(!user.hitAllow){
+    if(!user.hitTourniquetteAllowed){
 
-      console.log(`Room: user hit not allowed ${user.id}`)
+      console.log(`Room: user hit tourniquette not allowed ${user.id}`)
       return false
 
     }
 
     const sign = this.currentDirection === '+' ? '-' : '+'
     this.currentDirection = sign
-    user.hitAllow = false
+    user.hitTourniquetteAllowed = false
 
     setTimeout( () => {
 
-      user.hitAllow = true
+      user.hitTourniquetteAllowed = true
 
     }, 2 * 1000)
 
-    console.log(`Room: user hit ${user.id}`)
+    console.log(`Room: user hit tourniquette ${user.id}`)
 
     this.users.forEach( (oneUser: User) => {
 
@@ -413,6 +414,21 @@ class Room {
   }
 
   hitSnowBall(user: User, data: any){
+
+    if(!user.hitSnowBallAllowed){
+      console.log(`Room: user hit snow ball not allowed ${user.id}`)
+
+      return false
+
+    }
+
+    user.hitSnowBallAllowed = false
+
+    setTimeout(() => {
+
+      user.hitSnowBallAllowed = true
+
+    }, 4000)
 
     this.users.forEach( (oneUser: User) => {
 

@@ -38,7 +38,8 @@ class Game implements ISystem {
   endGameText: UIText
   isPlaying = false
   fallenOut = false
-  hitAllowed = false
+  hitTourniquetteAllowed = false
+  hitSnowBallAllowed = true
 
   // physics
   world: CANNON.World
@@ -149,6 +150,11 @@ class Game implements ISystem {
       if(!this.userId || !this.camera){
         return false
       }
+      if(!this.hitSnowBallAllowed){
+        log('hit ssnow ball cooldown')
+        return false
+      }
+      this.hitSnowBallAllowed = false
       const inputVector = this.forwardVector.clone()
       const position = this.camera.position.clone()
       const rotation = this.camera.rotation.clone()
@@ -443,6 +449,10 @@ class Game implements ISystem {
       engine.removeEntity(ball)
       this.snowBalls = this.snowBalls.filter(oneSnowBall => oneSnowBall !== ball)
 
+      if(ball.userId === this.userId){
+        this.hitSnowBallAllowed = true
+      }
+
     }) )
 
     // if(this.userId !== userId){
@@ -528,14 +538,14 @@ class Game implements ISystem {
     const onPointerDown = new OnPointerDown(
       (e) => {
 
-        if(this.isPlaying && !this.fallenOut && this.hitAllowed){
+        if(this.isPlaying && !this.fallenOut && this.hitTourniquetteAllowed){
 
           onPointerDown.hoverText = ''
           onPointerDown.showFeedback = false
-          this.hitAllowed = false
+          this.hitTourniquetteAllowed = false
           setTimeout(() => {
 
-            this.hitAllowed = true
+            this.hitTourniquetteAllowed = true
             onPointerDown.hoverText = 'Hit'
             onPointerDown.showFeedback = true
 
@@ -631,7 +641,7 @@ class Game implements ISystem {
     if(this.endGameText){
       this.endGameText.value = ''
     }
-    this.hitAllowed = false
+    this.hitTourniquetteAllowed = false
     this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
     if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
 
@@ -692,7 +702,7 @@ class Game implements ISystem {
       if(userPosition !== -1){
         this.isPlaying = true
         this.fallenOut = false
-        this.hitAllowed = true
+        this.hitTourniquetteAllowed = true
       }
 
     }) )
@@ -730,7 +740,7 @@ class Game implements ISystem {
       this.soundSystem.backgroundMusic(true)
       this.soundSystem.gameMusic(false)
 
-      this.hitAllowed = false
+      this.hitTourniquetteAllowed = false
       this.isPlaying = false
       this.fallenOut = false
 
