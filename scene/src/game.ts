@@ -47,7 +47,6 @@ class Game implements ISystem {
   maxSubSteps = 3
   ballPhysicsMaterial: CANNON.Material
   groundBody: CANNON.Body
-  forwardVector = Vector3.Forward().rotate(Camera.instance.rotation)
   vectorScale = 75
 
   gameSpots: Vector3[] = [
@@ -141,7 +140,6 @@ class Game implements ISystem {
     //   )
     // )
 
-
   // }
 
   listenSnowBallHit(){
@@ -155,9 +153,10 @@ class Game implements ISystem {
         return false
       }
       this.hitSnowBallAllowed = false
-      const inputVector = this.forwardVector.clone()
+
       const position = this.camera.position.clone()
       const rotation = this.camera.rotation.clone()
+      const inputVector = Vector3.Forward().rotate(Quaternion.Euler(-5, 0, 0)).rotate(rotation)
 
       if(this.socket && this.socket.readyState === WebSocket.OPEN){
 
@@ -165,9 +164,9 @@ class Game implements ISystem {
           JSON.stringify({
             type: 'HIT_SNOW_BALL',
             data: {
-              inputVector,
               position,
-              rotation
+              rotation,
+              inputVector,
             },
           })
         )
@@ -393,8 +392,6 @@ class Game implements ISystem {
       this.playerFallOut()
 
     }
-
-    this.forwardVector = Vector3.Forward().rotate(Camera.instance.rotation)
 
     this.world.step(this.fixedTimeStep, dt, this.maxSubSteps)
     this.snowBalls.forEach((snowBall) => {
