@@ -4,6 +4,7 @@ import utils from '../node_modules/decentraland-ecs-utils/index'
 import {Dialog, NPC} from '../node_modules/@dcl/npc-utils/index'
 import {movePlayerTo} from '@decentraland/RestrictedActions'
 import { getUserData } from '@decentraland/Identity'
+import { CornerLabel } from '../node_modules/@dcl/ui-utils/index'
 
 import { Player, PlayersData } from './modules/Player'
 // import { Ground } from './entities/ground'
@@ -72,6 +73,7 @@ class Game implements ISystem {
 
   constructor() {
 
+    this.canvas = new CornerLabel('').canvas
     // this.createGround()
     this.createXmasBall()
     this.createTheTourniquette()
@@ -83,7 +85,6 @@ class Game implements ISystem {
       this.onSocketFailed()
     })
     this.createLutin()
-    this.canvas = new UICanvas()
     this.listenSnowBallHit()
     // this.createKdo()
     // this.createAvatarHitbox()
@@ -378,7 +379,6 @@ class Game implements ISystem {
         },
       }
     )
-
   }
 
   update(dt: number): void {
