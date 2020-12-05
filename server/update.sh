@@ -7,5 +7,4 @@ git pull
 git checkout prod
 npm install
 sudo /bin/systemctl restart tourniquette
-journalctl -n 15000 -u tourniquette -f 
-
+systemctl status tourniquette
