@@ -66,6 +66,7 @@ class Game implements ISystem {
   snowBalls: SnowBallHit[] = []
   theTourniquette: Entity
   theTourniquetteCollider: Entity
+  rotationSpeed = 50
   teleporter: Teleporter
   countDownBox: countDownBox
   hidePassport: Entity
@@ -579,11 +580,18 @@ class Game implements ISystem {
   }
 
   createTheTourniquette(){
-    this.theTourniquetteCollider = new TheTourniquetteCollider(new BoxShape(), new Transform({
+    this.theTourniquette = new TheTourniquette(new GLTFShape('models/sucreDorge.glb'), new Transform({
       //position: new Vector3(8, 13, 8),
-      position: new Vector3(8, 13, 8),
-      scale: new Vector3(14, 0.5, 0.04),
+      position: new Vector3(8, 12, 8),
+      scale:  new Vector3(1, 1, 1),
       rotation: Quaternion.Euler(0,45,0)
+    }) )
+    this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
+
+    this.theTourniquetteCollider = new TheTourniquetteCollider(new BoxShape(), this.theTourniquette, new Transform({
+      position: new Vector3(0, 0.6, 0),
+      scale: new Vector3(14, 1, 0.04),
+      rotation: Quaternion.Euler(0,0,0)
     }) )
     const onPointerDown = new OnPointerDown(
       (e) => {
@@ -600,7 +608,6 @@ class Game implements ISystem {
             onPointerDown.showFeedback = true
 
           }, 2 * 1000)
-          log('theTourniquetteCollider clicked')
           if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 
             this.socket.send(JSON.stringify({
@@ -616,13 +623,6 @@ class Game implements ISystem {
         distance: 4
       })
     this.theTourniquetteCollider.addComponent(onPointerDown)
-    this.theTourniquette = new TheTourniquette(new GLTFShape('models/sucreDorge.glb'), new Transform({
-      //position: new Vector3(8, 13, 8),
-      position: new Vector3(8, 12, 8),
-      scale:  new Vector3(1, 1, 1),
-      rotation: Quaternion.Euler(0,45,0)
-    }) )
-    this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
 
   }
 
@@ -679,12 +679,12 @@ class Game implements ISystem {
     this.teleporter.gamePlaying(true)
     this.gameText.value = ''
     this.hitTourniquetteAllowed = false
-    this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
     if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
 
       this.theTourniquette.getComponent(utils.KeepRotatingComponent).stop()
 
     }
+    this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0, 45, 0)
 
     let userPosition = -1
     let avatarFreezeBoxes: AvatarFreezeBox[] = []
@@ -730,8 +730,23 @@ class Game implements ISystem {
     this.theTourniquette.addComponent(new utils.Delay(4000, () => {
 
       avatarFreezeBoxes.forEach(avatarFreezeBox => engine.removeEntity(avatarFreezeBox) )
-      this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
-      this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
+      this.rotationSpeed = 50
+      this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotationSpeed, 0) ) )
+
+      this.theTourniquette.addComponentOrReplace(new utils.Interval(3000,() => {
+
+        if(Math.abs(this.rotationSpeed) < 100){
+
+          this.rotationSpeed = this.rotationSpeed > 0 ? this.rotationSpeed + 5 : this.rotationSpeed - 5
+          this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotationSpeed, 0) ) )
+
+        } else {
+
+          this.theTourniquette.getComponent(utils.Interval).setCallback(null)
+
+        }
+
+      }) )
 
       this.soundSystem.gameMusic(true)
 
@@ -754,10 +769,9 @@ class Game implements ISystem {
 
     }
 
-    if(this.theTourniquetteCollider.hasComponent(utils.KeepRotatingComponent) ){
+    if(this.theTourniquette.hasComponent(utils.Interval) ){
 
-      this.theTourniquetteCollider.getComponent(utils.KeepRotatingComponent).stop()
-      this.theTourniquetteCollider.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
+      this.theTourniquette.getComponent(utils.Interval).setCallback(null)
 
     }
 
@@ -911,9 +925,8 @@ class Game implements ISystem {
         }
         case 'CHANGE_DIRECTION': {
 
-          const rotation = parsed.data.sign === '+' ? 100 : -100
-          this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, rotation, 0) ) )
-          this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, rotation, 0) ) )
+          this.rotationSpeed = parsed.data.sign === '+' ? Math.abs(this.rotationSpeed) : -this.rotationSpeed
+          this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotationSpeed, 0) ) )
 
           break
         }

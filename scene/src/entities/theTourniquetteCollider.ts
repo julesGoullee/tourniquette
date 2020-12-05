@@ -1,9 +1,10 @@
 export class TheTourniquetteCollider extends Entity {
 
-  constructor(model: BoxShape, transform: Transform) {
+  constructor(model: BoxShape, parent: Entity, transform: Transform) {
 
     super()
     this.addComponent(model)
+    this.setParent(parent)
     model.withCollisions = true
 
     const myMaterial = new Material()

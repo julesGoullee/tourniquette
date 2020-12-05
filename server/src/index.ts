@@ -92,7 +92,7 @@ class User {
 
       this.wsIsAlive = false
 
-    }, 5 * 1000);
+    }, 2 * 1000);
 
     this.ws.on('message', (data) => {
 
