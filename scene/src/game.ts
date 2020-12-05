@@ -17,7 +17,7 @@ import { XmasBall } from './entities/xmasBall'
 import { AvatarFreezeBox } from './entities/avatarFreezeBox'
 // import { lutinSpeaks } from 'entities/dialog'
 import { SnowSystem } from './modules/snow'
-import { setTimeout, ITimeoutClean } from './utils'
+import {setTimeout, ITimeoutClean, setInterval} from './utils'
 import { SnowBallHit } from './entities/snowBallHit'
 import { SnowBall } from './entities/snowBall'
 import { SoundSystem } from './modules/sounds'
@@ -26,7 +26,7 @@ import { countDownBox } from './entities/countDown'
 
 class Game implements ISystem {
 
-  webSocketUrl = 'ws://192.168.100.4:13370'
+  webSocketUrl = 'ws://localhost:13370'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
   userId: string
@@ -442,44 +442,81 @@ class Game implements ISystem {
 
     })
 
+    if(ball.userId === this.userId){
+
+      setTimeout(() => {
+
+        this.hitSnowBallAllowed = true
+
+      }, 1000)
+
+    }
+
     ball.addComponent(new utils.Delay(4000, () => {
 
       this.world.removeBody(ball.body)
       engine.removeEntity(ball)
       this.snowBalls = this.snowBalls.filter(oneSnowBall => oneSnowBall !== ball)
 
-      if(ball.userId === this.userId){
-        this.hitSnowBallAllowed = true
-      }
+
 
     }) )
 
-    // if(this.userId !== userId){
-    //
-    //   ball.addComponent(
-    //     new utils.TriggerComponent(
-    //       new utils.TriggerBoxShape(new Vector3(0.2, 0.2, 0.2), Vector3.Zero() ),
-    //       null, null, null, null,
-    //       () => {
-    //         log('enter')
-    //         const position = ball.getComponent(Transform).position.clone().subtract(new Vector3(0, 1, 0))
-    //         const rotation = ball.getComponent(Transform).rotation.clone().subtract(Quaternion.Euler(0, -45, 0) )
-    //         const snowHit = new SnowBallHit(new BoxShape(), new Transform({
-    //           position,
-    //           rotation,
-    //           scale: new Vector3(0.5, 1, 0.1)
-    //         }))
-    //         snowHit.addComponent(new utils.MoveTransformComponent(position, this.camera.position, 1) )
-    //         snowHit.addComponent(new utils.Delay(1000, () => {
-    //           engine.removeEntity(snowHit)
-    //         }) )
-    //
-    //       },
-    //       () => {}, false
-    //     )
-    //   )
-    //
-    // }
+    if(this.userId !== userId){
+
+      ball.addComponent(
+        new utils.TriggerComponent(
+          new utils.TriggerBoxShape(new Vector3(0.2, 0.2, 0.2), Vector3.Zero() ),
+          null, null, null, null,
+          () => {
+
+            const imageAtlas = 'images/snowBall.png'
+            const imageTexture = new Texture(imageAtlas)
+            const snowSplash = new UIImage(this.canvas, imageTexture)
+            snowSplash.opacity = 1
+
+            const timer = setInterval(() => {
+
+              if(snowSplash.opacity === 0){
+
+                timer.clearInterval()
+
+              } else {
+
+                snowSplash.opacity -= 0.05
+
+              }
+            }, 100)
+
+            snowSplash.name = "clickable-image"
+            snowSplash.width = '800px'
+            snowSplash.height = '600px'
+            snowSplash.sourceWidth = 800
+            snowSplash.sourceHeight = 600
+            snowSplash.vAlign = 'center'
+            snowSplash.hAlign = 'center'
+            snowSplash.positionY = Math.random() * 300 - 100
+            snowSplash.positionX = Math.random() * 300 - 100
+            // Move player
+            // log('enter')
+            // const position = ball.getComponent(Transform).position.clone().subtract(new Vector3(0, 1, 0))
+            // const rotation = ball.getComponent(Transform).rotation.clone().subtract(Quaternion.Euler(0, -45, 0) )
+            // const snowHit = new SnowBallHit(new BoxShape(), new Transform({
+            //   position,
+            //   rotation,
+            //   scale: new Vector3(0.5, 1, 0.1)
+            // }))
+            // snowHit.addComponent(new utils.MoveTransformComponent(position, this.camera.position, 1) )
+            // snowHit.addComponent(new utils.Delay(1000, () => {
+            //   engine.removeEntity(snowHit)
+            // }) )
+
+          },
+          () => {}, false
+        )
+      )
+
+    }
 
     this.snowBalls.push(ball)
 
