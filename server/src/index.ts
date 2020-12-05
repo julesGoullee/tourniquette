@@ -65,6 +65,13 @@ class User {
     console.log('WebSocket: client open')
     this.wsIsAlive = true
 
+    this.ws.send(JSON.stringify({
+      type: 'HELLO',
+      data: {
+        isPlaying: this.room.isPlaying,
+      }
+    }) )
+
     this.intervalAlive = setInterval( () =>{
 
       if(this.ws.readyState === WebSocket.OPEN && this.wsIsAlive){
@@ -72,7 +79,7 @@ class User {
         this.ws.send(JSON.stringify({
           type: 'PING',
           data: {
-            time: Date.now()
+            time: Date.now(),
           }
         }) )
 
