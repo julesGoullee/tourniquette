@@ -24,10 +24,13 @@ import { SnowBall } from './entities/snowBall'
 import { SoundSystem } from './modules/sounds'
 // import { Kdo } from './entities/kdo'
 import { countDownBox } from './entities/countDown'
+import { HidePassportBox } from './entities/hidePassportBox'
 
 class Game implements ISystem {
 
-  webSocketUrl = 'ws://localhost:13370'
+  // webSocketUrl = 'ws://192.168.0.4:13370'
+  // webSocketUrl = 'ws://localhost:13370'
+  webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
   userId: string
@@ -65,6 +68,7 @@ class Game implements ISystem {
   theTourniquetteCollider: Entity
   teleporter: Teleporter
   countDownBox: countDownBox
+  hidePassport: Entity
   // avatarHitbox: Entity
   // santa: Santa
   // kdo: Kdo
@@ -91,8 +95,17 @@ class Game implements ISystem {
     this.createCountDown()
     this.soundSystem = new SoundSystem()
     this.soundSystem.backgroundMusic()
-
     this.createGameText()
+    this.createHidePassport()
+
+  }
+
+  createHidePassport(){
+
+    this.hidePassport = new HidePassportBox(new Transform({
+      position: new Vector3(8, 8, 8),
+      scale: new Vector3(16, 16, 16)
+    }), new Vector3(16, 10, 16) )
 
   }
 
