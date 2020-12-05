@@ -792,7 +792,6 @@ class Game implements ISystem {
 
         const winner = this.playersInGame.filter(p => p.id === userWinner)[0]
         this.gameText.value = `${winner.displayName} won the game !`
-        this.soundSystem.failGame()
 
       }
 
@@ -805,6 +804,7 @@ class Game implements ISystem {
     log('playerFallOut')
     this.fallenOut = true
     this.gameText.value = 'You lose...'
+    this.soundSystem.failGame()
 
     if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 
