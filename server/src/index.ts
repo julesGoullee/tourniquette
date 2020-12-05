@@ -12,6 +12,7 @@ class User {
   ws: WebSocket
   room: Room
   id?: string
+  displayName?: string
   isPlaying = false
   hitAllow = false
   fallenOut = false
@@ -76,6 +77,7 @@ class User {
           if(!this.id){
 
             this.id = parsed.data.userId
+            this.displayName = parsed.data.displayName
 
           }
 
@@ -254,7 +256,9 @@ class Room {
         oneUser.ws.send(JSON.stringify({
           type: 'START',
           data: {
-            playersId: this.users.filter(oneUser => oneUser.isPlaying).map(oneUser => oneUser.id)
+            players: this.users.filter(oneUser => oneUser.isPlaying).map(oneUser => {
+              return { id: oneUser.id, displayName: oneUser.displayName }
+            })
           }
         }) )
 
@@ -405,6 +409,7 @@ class Room {
       }
 
     })
+
   }
 
   hitSnowBall(user: User, data: any){

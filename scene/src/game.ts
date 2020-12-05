@@ -5,6 +5,7 @@ import {Dialog, NPC} from '../node_modules/@dcl/npc-utils/index'
 import {movePlayerTo} from '@decentraland/RestrictedActions'
 import { getUserData } from '@decentraland/Identity'
 
+import { Player, PlayersData } from './modules/Player'
 // import { Ground } from './entities/ground'
 // import { AvatarHitbox } from './entities/avatarHitbox'
 import { Santa } from './entities/santa'
@@ -23,13 +24,14 @@ import { SoundSystem } from './modules/sounds'
 // import { Kdo } from './entities/kdo'
 import { countDownBox } from './entities/countDown'
 
-
 class Game implements ISystem {
 
-  webSocketUrl = 'ws://127.0.0.1:13370'
+  webSocketUrl = 'ws://192.168.100.4:13370'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
   userId: string
+  displayName: string
+  playersInGame: Player[] = []
   camera: Camera = Camera.instance
   input = Input.instance
   canvas: UICanvas
@@ -443,32 +445,32 @@ class Game implements ISystem {
 
     }) )
 
-    if(this.userId !== userId){
-
-      ball.addComponent(
-        new utils.TriggerComponent(
-          new utils.TriggerBoxShape(new Vector3(0.2, 0.2, 0.2), Vector3.Zero() ),
-          null, null, null, null,
-          () => {
-            log('enter')
-            const position = ball.getComponent(Transform).position.clone().subtract(new Vector3(0, 1, 0))
-            const rotation = ball.getComponent(Transform).rotation.clone().subtract(Quaternion.Euler(0, -45, 0) )
-            const snowHit = new SnowBallHit(new BoxShape(), new Transform({
-              position,
-              rotation,
-              scale: new Vector3(0.5, 1, 0.1)
-            }))
-            snowHit.addComponent(new utils.MoveTransformComponent(position, this.camera.position, 1) )
-            snowHit.addComponent(new utils.Delay(1000, () => {
-              engine.removeEntity(snowHit)
-            }) )
-
-          },
-          () => {}, false
-        )
-      )
-
-    }
+    // if(this.userId !== userId){
+    //
+    //   ball.addComponent(
+    //     new utils.TriggerComponent(
+    //       new utils.TriggerBoxShape(new Vector3(0.2, 0.2, 0.2), Vector3.Zero() ),
+    //       null, null, null, null,
+    //       () => {
+    //         log('enter')
+    //         const position = ball.getComponent(Transform).position.clone().subtract(new Vector3(0, 1, 0))
+    //         const rotation = ball.getComponent(Transform).rotation.clone().subtract(Quaternion.Euler(0, -45, 0) )
+    //         const snowHit = new SnowBallHit(new BoxShape(), new Transform({
+    //           position,
+    //           rotation,
+    //           scale: new Vector3(0.5, 1, 0.1)
+    //         }))
+    //         snowHit.addComponent(new utils.MoveTransformComponent(position, this.camera.position, 1) )
+    //         snowHit.addComponent(new utils.Delay(1000, () => {
+    //           engine.removeEntity(snowHit)
+    //         }) )
+    //
+    //       },
+    //       () => {}, false
+    //     )
+    //   )
+    //
+    // }
 
     this.snowBalls.push(ball)
 
@@ -624,13 +626,12 @@ class Game implements ISystem {
   //   )
   // }
 
-  start(playersId: [string]){
+  start(players: [PlayersData] ){
 
     if(this.endGameText){
       this.endGameText.value = ''
     }
     this.hitAllowed = false
-    const userPosition = playersId.indexOf(this.userId as never)
     this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
     if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
 
@@ -638,49 +639,62 @@ class Game implements ISystem {
 
     }
 
+    let userPosition = -1
+    let avatarFreezeBoxes: AvatarFreezeBox[] = []
+
+    this.playersInGame = players.map( (playersData, i) => {
+      const player = new Player(playersData.id, playersData.displayName, i)
+      if(player.id === this.userId){
+        userPosition = i
+      }
+      return player
+    })
+
     if(userPosition === -1){
 
       log('User not playing')
       return false
 
+    } else {
+
+      movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: 8, y: 15, z: 8 })
+      // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
+      avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+        position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
+        scale: new Vector3(1, 10, 2)
+      }) ) )
+      avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+        position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
+        scale: new Vector3(1, 10, 2)
+      }) ) )
+      avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+        position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),
+        scale: new Vector3(2, 10, 1)
+      }) ) )
+      avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+        position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
+        scale: new Vector3(2, 10, 1)
+      }) ) )
+
     }
 
-    movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: 8, y: 15, z: 8 })
     this.countDownBox.playCountDown()
-    // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
-
-    const avatarFreezeBox1 = new AvatarFreezeBox(new BoxShape(), new Transform({
-      position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
-      scale: new Vector3(1, 10, 2)
-    }) )
-    const avatarFreezeBox2 = new AvatarFreezeBox(new BoxShape(), new Transform({
-      position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
-      scale: new Vector3(1, 10, 2)
-    }) )
-    const avatarFreezeBox3 = new AvatarFreezeBox(new BoxShape(), new Transform({
-      position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),
-      scale: new Vector3(2, 10, 1)
-    }) )
-    const avatarFreezeBox4 = new AvatarFreezeBox(new BoxShape(), new Transform({
-      position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
-      scale: new Vector3(2, 10, 1)
-    }) )
-
     this.soundSystem.backgroundMusic(false)
     this.soundSystem.startGame()
 
     this.theTourniquette.addComponent(new utils.Delay(4000, () => {
 
-      engine.removeEntity(avatarFreezeBox1)
-      engine.removeEntity(avatarFreezeBox2)
-      engine.removeEntity(avatarFreezeBox3)
-      engine.removeEntity(avatarFreezeBox4)
+      avatarFreezeBoxes.forEach(avatarFreezeBox => engine.removeEntity(avatarFreezeBox) )
       this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
       this.theTourniquetteCollider.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
-      this.isPlaying = true
-      this.fallenOut = false
       this.soundSystem.gameMusic(true)
-      this.hitAllowed = true
+
+      if(userPosition !== -1){
+        this.isPlaying = true
+        this.fallenOut = false
+        this.hitAllowed = true
+      }
+
     }) )
 
   }
@@ -735,6 +749,22 @@ class Game implements ISystem {
 
   }
 
+  otherPlayerFallenOut(playerId: string){
+
+    this.playersInGame.some(player => {
+
+      if(player.id === playerId){
+
+        player.fallenOut = true
+        return true
+
+      }
+
+      return false
+
+    })
+  }
+
   async joinSocketsServer() {
 
     const realm = await getCurrentRealm()
@@ -742,6 +772,7 @@ class Game implements ISystem {
 
     const userData = await getUserData()
     this.userId = userData.userId
+    this.displayName = userData.displayName
     log(`You are: `, userData.userId)
 
     this.socket = new WebSocket(
@@ -756,7 +787,8 @@ class Game implements ISystem {
         this.socket.send(JSON.stringify({
           type: 'USER_ID',
           data: {
-            userId: this.userId
+            userId: this.userId,
+            displayName: userData.displayName
           }
         }) )
 
@@ -795,7 +827,7 @@ class Game implements ISystem {
           break
         }
         case 'START': {
-          this.start(parsed.data.playersId)
+          this.start(parsed.data.players)
           break
         }
         case 'END_GAME': {
@@ -803,6 +835,8 @@ class Game implements ISystem {
           break
         }
         case 'FALLEN_OUT': {
+
+          this.otherPlayerFallenOut(parsed.data.playerId)
           break
         }
         case 'HIT_SNOW_BALL': {
@@ -835,7 +869,7 @@ class Game implements ISystem {
       this.teleporter.getComponent(OnPointerDown).hoverText = 'Connection failed, try later'
     }
 
-    if(!this.timeoutReconnectWebSocket) {
+    if(!this.timeoutReconnectWebSocket){
 
       this.timeoutReconnectWebSocket = setTimeout(() => {
 
