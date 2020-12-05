@@ -463,7 +463,7 @@ class Room {
 
       user.hitSnowBallAllowed = true
 
-    }, 4000)
+    }, 1000)
 
     this.users.forEach( (oneUser: User) => {
 
