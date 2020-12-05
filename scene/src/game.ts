@@ -148,10 +148,12 @@ class Game implements ISystem {
       if(!this.userId || !this.camera){
         return false
       }
+
       if(!this.hitSnowBallAllowed){
-        log('hit ssnow ball cooldown')
+        log('hit snow ball cooldown')
         return false
       }
+
       this.hitSnowBallAllowed = false
 
       const position = this.camera.position.clone()
@@ -826,7 +828,8 @@ class Game implements ISystem {
             this.socket.send(JSON.stringify({
               type: 'PONG',
               data: {
-                time: Date.now()
+                time: Date.now(),
+                position: this.camera.position
               }
             }))
 

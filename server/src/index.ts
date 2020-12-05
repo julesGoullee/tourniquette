@@ -5,6 +5,12 @@ const CONFIG = {
   MAX_PLAYERS_COUNT: parseInt(process.env.MAX_PLAYERS_COUNT || '4', 10),
 }
 
+interface Position {
+  x: number
+  y: number
+  z: number
+}
+
 class User {
 
   static Users: User[] = []
@@ -19,11 +25,38 @@ class User {
   fallenOut = false
   intervalAlive?: NodeJS.Timeout
   wsIsAlive = true
+  position: Position = { x: -1, y: -1, z: -1 }
 
   constructor(ws: WebSocket, room: Room){
 
     this.ws = ws
     this.room = room
+
+  }
+
+  isOutsideParcel() {
+
+    return this.position.x < 0 ||
+      this.position.x > 16 ||
+      this.position.z > 16 ||
+      this.position.z < 0
+
+  }
+
+  onTick(data: any){
+
+    this.wsIsAlive = true
+    if(data.position.x && data.position.y && data.position.z){
+      this.position = data.position
+    }
+
+    if(this.isPlaying && !this.fallenOut && this.isOutsideParcel() ){
+
+      console.info(`User: on tick user outside ${this.id}`)
+
+      this.room.userFallOut(this)
+
+    }
 
   }
 
@@ -63,7 +96,8 @@ class User {
       switch (parsed.type){
 
         case 'PONG':
-          this.wsIsAlive = true
+
+          this.onTick(parsed.data)
           break
 
         case 'USER_ID':
@@ -138,6 +172,7 @@ class User {
 
     }
 
+    this.position = { x: -1, y: -1, z: -1 }
     this.room.removeUser(this)
 
   }
@@ -196,7 +231,7 @@ class Room {
       console.info(`Room: ${this.id} all users left`)
       Room.Rooms = Room.Rooms.filter(room => room !== this)
 
-    } else {
+    } else if(this.isPlaying && user.isPlaying && !user.fallenOut){
 
       this.users.forEach(oneUser => {
 
@@ -233,7 +268,7 @@ class Room {
 
     }
 
-    if(this.queueUsersReady.length === 0){
+    if(this.queueUsersReady.filter(user => !user.isOutsideParcel() ).length === 0){
 
       console.error(`Room: cannot start queue empty`)
 
@@ -243,7 +278,7 @@ class Room {
 
     this.isPlaying = true
     this.currentDirection = '+'
-    const usersPlaying = this.queueUsersReady.splice( 0, CONFIG.MAX_PLAYERS_COUNT + 1)
+    const usersPlaying = this.queueUsersReady.filter(user => !user.isOutsideParcel() ).splice( 0, CONFIG.MAX_PLAYERS_COUNT + 1)
 
     usersPlaying.forEach(oneUser => {
       oneUser.isPlaying = true
