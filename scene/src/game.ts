@@ -474,10 +474,11 @@ class Game implements ISystem {
             const imageTexture = new Texture(imageAtlas)
             const snowSplash = new UIImage(this.canvas, imageTexture)
             snowSplash.opacity = 1
+            snowSplash.isPointerBlocker = false
 
             const timer = setInterval(() => {
 
-              if(snowSplash.opacity === 0){
+              if(snowSplash.opacity === 0.1){
 
                 timer.clearInterval()
 
