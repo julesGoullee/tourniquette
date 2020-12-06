@@ -1,6 +1,4 @@
-const camera = Camera.instance
-
-export class countDownBox extends Entity {
+export class CountDownBox extends Entity {
 
   entity: Entity
 

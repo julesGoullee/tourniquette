@@ -23,7 +23,7 @@ import { SnowBallHit } from './entities/snowBallHit'
 import { SnowBall } from './entities/snowBall'
 import { SoundSystem } from './modules/sounds'
 // import { Kdo } from './entities/kdo'
-import { countDownBox } from './entities/countDown'
+import { CountDownBox } from './entities/countDown'
 import { HidePassportBox } from './entities/hidePassportBox'
 
 class Game implements ISystem {
@@ -68,7 +68,7 @@ class Game implements ISystem {
   theTourniquetteCollider: Entity
   rotationSpeed = 50
   teleporter: Teleporter
-  countDownBox: countDownBox
+  countDownBox: CountDownBox
   hidePassport: Entity
   // avatarHitbox: Entity
   // santa: Santa
@@ -259,7 +259,7 @@ class Game implements ISystem {
   }
 
   createCountDown() {
-    this.countDownBox = new countDownBox(new GLTFShape('models/countDown.glb'))
+    this.countDownBox = new CountDownBox(new GLTFShape('models/countDown.glb'))
   }
 
   createLutin(){
