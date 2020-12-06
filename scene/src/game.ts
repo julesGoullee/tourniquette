@@ -28,7 +28,7 @@ import { HidePassportBox } from './entities/hidePassportBox'
 
 class Game implements ISystem {
 
-  // webSocketUrl = 'ws://192.168.0.4:13370'
+  // webSocketUrl = 'ws://192.168.100.4:13370'
   webSocketUrl = 'ws://localhost:13370'
   // webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
@@ -64,6 +64,7 @@ class Game implements ISystem {
   xmasBall: Entity
   pilones: Entity[] = []
   snowBalls: SnowBallHit[] = []
+  avatarFreezeBoxes: AvatarFreezeBox[] = []
   theTourniquette: Entity
   theTourniquetteCollider: Entity
   rotationSpeed = 50
@@ -704,8 +705,7 @@ class Game implements ISystem {
     this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0, 45, 0)
 
     let userPosition = -1
-    let avatarFreezeBoxes: AvatarFreezeBox[] = []
-
+    this.avatarFreezeBoxes = []
     this.playersInGame = players.map( (playersData, i) => {
       const player = new Player(playersData.id, playersData.displayName, i)
       if(player.id === this.userId){
@@ -723,19 +723,19 @@ class Game implements ISystem {
 
     movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: -14 * 16 + 8, y: 18, z: -120 * 16 +8 })
     // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
-    avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+    this.avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
       position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
       scale: new Vector3(1, 10, 2)
     }) ) )
-    avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+    this.avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
       position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
       scale: new Vector3(1, 10, 2)
     }) ) )
-    avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+    this.avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
       position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),
       scale: new Vector3(2, 10, 1)
     }) ) )
-    avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
+    this.avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
       position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
       scale: new Vector3(2, 10, 1)
     }) ) )
@@ -746,7 +746,7 @@ class Game implements ISystem {
 
     this.theTourniquette.addComponent(new utils.Delay(4000, () => {
 
-      avatarFreezeBoxes.forEach(avatarFreezeBox => engine.removeEntity(avatarFreezeBox) )
+      this.avatarFreezeBoxes.forEach(avatarFreezeBox => engine.removeEntity(avatarFreezeBox) )
       this.rotationSpeed = 50
       this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotationSpeed, 0) ) )
 
@@ -792,14 +792,20 @@ class Game implements ISystem {
 
     }
 
+    if(this.theTourniquette.hasComponent(utils.Delay) ){ // end before delay start finish
+
+      log('end before delay start finish')
+      this.gameText.value = 'Everyone left!'
+      this.theTourniquette.getComponent(utils.Delay).setCallback(null)
+      this.soundSystem.backgroundMusic(true)
+      this.avatarFreezeBoxes.forEach(avatarFreezeBox => engine.removeEntity(avatarFreezeBox) )
+
+    }
+
     if(this.isPlaying){
 
-      this.soundSystem.backgroundMusic(true)
       this.soundSystem.gameMusic(false)
-
-      this.hitTourniquetteAllowed = false
-      this.isPlaying = false
-      this.fallenOut = false
+      this.soundSystem.backgroundMusic(true)
 
       if(userWinner === this.userId){
 
@@ -813,6 +819,10 @@ class Game implements ISystem {
       }
 
     }
+
+    this.hitTourniquetteAllowed = false
+    this.isPlaying = false
+    this.fallenOut = false
 
   }
 
@@ -956,7 +966,7 @@ class Game implements ISystem {
   onSocketFailed(){
 
     if(this.teleporter){
-      this.teleporter.getComponent(OnPointerDown).hoverText = 'Connection failed, try later'
+      this.teleporter.getComponent(OnPointerDown).hoverText = 'Connection failed, come back later'
     }
 
     if(!this.timeoutReconnectWebSocket){
@@ -968,7 +978,6 @@ class Game implements ISystem {
           .then(() => {
             log('socker server reconnected')
             this.timeoutReconnectWebSocket = null
-            this.teleporter.getComponent(OnPointerDown).hoverText = 'Start'
           })
           .catch(error => {
             log('error join socket server', error)

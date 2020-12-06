@@ -22,10 +22,13 @@ export class Teleporter extends Entity {
     }) )
     engine.addEntity(this)
 
-    this.onPointerDown = new OnPointerDown(onClick)
+    this.onPointerDown = new OnPointerDown(onClick, {
+      showFeedback: true,
+      distance: 3
+    })
     this.addComponent(this.onPointerDown)
 
-    this.gamePlaying(false);
+    this.onPointerDown.hoverText = 'Connecting...'
 
   }
 
