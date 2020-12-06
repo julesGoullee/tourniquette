@@ -386,7 +386,7 @@ class Game implements ISystem {
     ]
 
     const lutin = new NPC(
-      { position: new Vector3(6, 1, 15) },
+      { position: new Vector3(12.5, 1, 1.5) },
       'models/lutin.glb',
       () => {
         if(!isEndDialog){

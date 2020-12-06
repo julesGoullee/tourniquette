@@ -6,12 +6,12 @@ export class CountDownBox extends Entity {
 
     super()
     engine.addEntity(this)
-    this.setParent(Attachable.FIRST_PERSON_CAMERA)
+    this.setParent(Attachable.AVATAR)
 
     this.addComponent(model)
     this.addComponent(new Transform())
     // this.getComponent(Transform).position = new Vector3(3, 0, 0)
-    this.getComponent(Transform).position = new Vector3(0,0,3)
+    this.getComponent(Transform).position = new Vector3(0,1,3)
     this.getComponent(Transform).scale = new Vector3(.5,.5,.5)
     this.getComponent(Transform).rotation = new Quaternion(0,180,0)
     this.addComponent(new Animator());
