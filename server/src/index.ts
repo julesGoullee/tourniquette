@@ -129,7 +129,7 @@ class User {
 
         case 'START':
 
-          this.room.start()
+          this.room.start(this)
           break
 
         case 'FALLEN_OUT':
@@ -265,7 +265,7 @@ class Room {
 
   }
 
-  start(){
+  start(userInit: User){
 
     if(this.isPlaying){
 
@@ -275,7 +275,7 @@ class Room {
 
     }
 
-    if(this.queueUsersReady.filter(user => !user.isOutsideParcel() ).length === 0){
+    if(this.queueUsersReady.filter(user => !user.isOutsideParcel() || user === userInit).length === 0){
 
       console.error(`Room: cannot start queue empty`)
 
@@ -285,7 +285,7 @@ class Room {
 
     this.isPlaying = true
     this.currentDirection = '+'
-    const usersPlaying = this.queueUsersReady.filter(user => !user.isOutsideParcel() ).splice( 0, CONFIG.MAX_PLAYERS_COUNT + 1)
+    const usersPlaying = this.queueUsersReady.filter(user => !user.isOutsideParcel() || user === userInit).splice( 0, CONFIG.MAX_PLAYERS_COUNT + 1)
 
     usersPlaying.forEach(oneUser => {
       oneUser.isPlaying = true
