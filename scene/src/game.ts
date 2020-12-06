@@ -91,7 +91,6 @@ class Game implements ISystem {
       this.onSocketFailed()
     })
     this.createLutin()
-    this.listenSnowBallHit()
     // this.createKdo()
     // this.createAvatarHitbox()
     this.createCountDown()
@@ -108,6 +107,8 @@ class Game implements ISystem {
       position: new Vector3(8, 8, 8),
       scale: new Vector3(16, 16, 16)
     }), new Vector3(16, 10, 16) )
+
+    this.listenSnowBallHit()
 
   }
 
@@ -228,6 +229,9 @@ class Game implements ISystem {
         rotation,
         scale: new Vector3(0.1, 0.1, 0.1)
       }), inputVector)
+
+      this.soundSystem.throwBall()
+
     })
 
   }
@@ -423,7 +427,7 @@ class Game implements ISystem {
       this.camera.position.z < 0
     )) {
 
-      this.playerFallOut()
+      this.onFallout()
 
     }
 
@@ -778,6 +782,7 @@ class Game implements ISystem {
   endGame(userWinner: string){
 
     this.teleporter.gamePlaying(false)
+    this.soundSystem.endGame()
 
     if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
 
@@ -809,6 +814,7 @@ class Game implements ISystem {
 
       if(userWinner === this.userId){
 
+        this.soundSystem.winGame()
         this.gameText.value = 'Congrats, You won !'
 
       } else if(userWinner){
@@ -826,7 +832,7 @@ class Game implements ISystem {
 
   }
 
-  playerFallOut(){
+  onFallout(){
 
     log('playerFallOut')
     this.fallenOut = true
@@ -843,13 +849,18 @@ class Game implements ISystem {
     }
   }
 
-  otherPlayerFallenOut(playerId: string){
+  onPlayerFallout(playerId: string){
+
+    if(playerId !== this.userId) {
+      this.soundSystem.otherPlayerFall();
+    }
 
     this.playersInGame.some(player => {
 
       if(player.id === playerId){
 
         player.fallenOut = true
+
         return true
 
       }
@@ -936,8 +947,7 @@ class Game implements ISystem {
           break
         }
         case 'FALLEN_OUT': {
-
-          this.otherPlayerFallenOut(parsed.data.playerId)
+          this.onPlayerFallout(parsed.data.playerId)
           break
         }
         case 'HIT_SNOW_BALL': {
@@ -955,6 +965,7 @@ class Game implements ISystem {
           this.rotationSpeed = parsed.data.sign === '+' ? Math.abs(this.rotationSpeed) : -this.rotationSpeed
           this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotationSpeed, 0) ) )
 
+          this.soundSystem.reverseTourniquette(this.theTourniquette)
           break
         }
       }
