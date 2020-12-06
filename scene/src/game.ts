@@ -29,8 +29,8 @@ import { HidePassportBox } from './entities/hidePassportBox'
 class Game implements ISystem {
 
   // webSocketUrl = 'ws://192.168.0.4:13370'
-  webSocketUrl = 'ws://localhost:13370'
-  // webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
+  // webSocketUrl = 'ws://localhost:13370'
+  webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
   userId: string
@@ -173,8 +173,25 @@ class Game implements ISystem {
 */
 
   listenSnowBallHit(){
-    this.input.subscribe('BUTTON_DOWN', ActionButton.POINTER, false, (e) => {
+    this.input.subscribe('BUTTON_DOWN', ActionButton.POINTER, true, (e) => {
 
+      // log(e.hit.entityId, 'hit')
+      if(e.hit.entityId === 'E1k'){ // fire
+
+        return false
+
+      }
+
+      if(e.hit.entityId === 'E15'){ // tourniquette
+
+        return false
+
+      }
+      if(e.hit.entityId === 'E11'){ // lutin
+
+        return false
+
+      }
       if(!this.userId || !this.camera){
         return false
       }
@@ -704,7 +721,7 @@ class Game implements ISystem {
 
     }
 
-    movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: 8, y: 15, z: 8 })
+    movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: -14 * 16 + 8, y: 18, z: -120 * 16 +8 })
     // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
     avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
       position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
