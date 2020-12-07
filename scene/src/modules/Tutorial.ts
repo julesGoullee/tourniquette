@@ -53,13 +53,15 @@ export class Tutorial {
         imageJump.opacity = 0
         imageThrowSnowBall.opacity = 0
         imageReverseRotation.opacity = 0
+        imageTitle.opacity = 0
         imageJump.width = 0
         imageThrowSnowBall.width = 0
         imageReverseRotation.width = 0
+        imageTitle.width = 0
         imageJump.height = 0
         imageThrowSnowBall.height = 0
         imageReverseRotation.height = 0
-
+        imageTitle.height = 0
         this.prompt.close()
       },
       ButtonStyles.E
