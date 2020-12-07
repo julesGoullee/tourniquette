@@ -2,8 +2,6 @@ import {Dialog, NPC} from '../../node_modules/@dcl/npc-utils/index'
 
 export class Lutin extends Entity {
 
-  isEndDialog: boolean = false
-
   constructor() {
 
     super()
@@ -95,7 +93,6 @@ export class Lutin extends Entity {
         text: `GoodLuck !`,
         isEndOfDialog: true,
         triggeredByNext: () => {
-          this.isEndDialog = true
         }
       },
       {
@@ -113,24 +110,22 @@ export class Lutin extends Entity {
     const lutin = new NPC(
       {
         position: new Vector3(12.5, 1, 1.5),
-        rotation: Quaternion.Euler(0, 0 , 0)
+        rotation: Quaternion.Euler(0, 90 , 0)
       },
       'models/lutin.glb',
       () => {
-        if(!this.isEndDialog){
           lutin.talk(lutinSpeaks, 0)
           lutin.playAnimation('dancingJoy', false)
-        }
 
       },
       {
-        idleAnim : 'sadIdle',
+        idleAnim : 'dancingJoy',
         faceUser : true,
         portrait: { path: 'images/lutin.png', height: 256, width: 256 },
         darkUI: true,
         coolDownDuration: 3,
         hoverText: 'CHAT',
-        // onlyClickTrigger: true,
+        onlyClickTrigger: true,
         // onlyExternalTrigger: false,
         reactDistance: 1,
         continueOnWalkAway: false,

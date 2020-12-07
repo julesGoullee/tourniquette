@@ -96,7 +96,7 @@ export class SoundSystem implements ISystem {
     const meteoaudiosource = meteosound.getComponent(AudioSource);
     meteoaudiosource.playing = playing
     meteoaudiosource.loop = true
-    meteoaudiosource.volume = 0.3
+    meteoaudiosource.volume = 0.2
   }
 
   gameMusic(playing: boolean = true) {
@@ -186,7 +186,7 @@ export class SoundSystem implements ISystem {
   grelots(parent: Entity) {
     const sound = this.getOrCreateSound('grelots', grelotsClip, null, parent)
     const audioSource = sound.getComponent(AudioSource);
-    audioSource.volume = 0.3
+    audioSource.volume = 0.05
     audioSource.playing = true
     audioSource.loop = true
   }
