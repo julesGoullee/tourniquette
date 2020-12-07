@@ -24,8 +24,8 @@ import {createUserWinnerUI} from "./modules/ui";
 class Game implements ISystem {
 
   // webSocketUrl = 'ws://192.168.100.4:13370'
-  // webSocketUrl = 'ws://localhost:13370'
-  webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
+  webSocketUrl = 'ws://localhost:13370'
+  // webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
   userId: string
