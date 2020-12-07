@@ -18,7 +18,8 @@ import { CountDownBox } from './entities/countDown'
 import {Lutin} from './entities/lutin'
 import {PhysicsWorld} from './modules/physicsWorld'
 import { AvatarFreezeBoxes } from './modules/AvatarFreezeBoxes'
-
+import { Win } from './entities/win'
+import { Lose } from './entities/lose'
 class Game implements ISystem {
 
   // webSocketUrl = 'ws://192.168.100.4:13370'
@@ -58,6 +59,8 @@ class Game implements ISystem {
   rotationSpeed = 50
   teleporter: Teleporter
   countDownBox: CountDownBox
+  win: Win
+  lose: Lose
   // avatarHitbox: Entity
   // santa: Santa
   // kdo: Kdo
@@ -81,6 +84,8 @@ class Game implements ISystem {
     // this.createKdo()
     // this.createAvatarHitbox()
     this.createCountDown()
+    this.createWin()
+    this.createLose()
     this.soundSystem = new SoundSystem()
     this.soundSystem.backgroundMusic()
     this.avatarFreezeBoxes = new AvatarFreezeBoxes()
@@ -143,6 +148,23 @@ class Game implements ISystem {
 
   createCountDown() {
     this.countDownBox = new CountDownBox()
+  }
+
+  createWin() {
+    this.win = new Win(new GLTFShape('models/win.glb'), new Transform({
+      position: new Vector3(0,1,2),
+      scale: new Vector3(.2,.2,.2),
+      rotation: Quaternion.Euler(0,-90,0)
+    }) )
+
+  }
+
+  createLose() {
+    this.lose = new Lose(new GLTFShape('models/lose.glb'), new Transform({
+      position: new Vector3(0,1,2),
+      scale: new Vector3(.2,.2,.2),
+      rotation: Quaternion.Euler(0,-90,0)
+    }) )
   }
 
   createLutin(){
@@ -393,7 +415,7 @@ class Game implements ISystem {
       if(userWinner === this.userId){
 
         this.soundSystem.winGame()
-        this.gameText.value = 'Congrats, You won !'
+        this.win.playWin()
 
       } else if(userWinner){
 
@@ -414,8 +436,9 @@ class Game implements ISystem {
 
     log('playerFallOut')
     this.fallenOut = true
-    this.gameText.value = 'You lose...'
     this.soundSystem.failGame()
+    this.lose.playLose()
+
 
     this.sendSocket('FALLEN_OUT');
 
