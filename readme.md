@@ -11,6 +11,8 @@
 
 Visitors can play a 4-player platform game where they need to be the last man standing on a platform, by avoiding a cane sugar rotating ever quickly ! For more challenge, players can reverse the rotation of the cane sugar and throw each other snowballs that will splash on their screens. 
 
+[Watch a video](https://youtu.be/l2YjyiyalX4)
+
 ## Play
 
 The game is available at `-14,-120`
