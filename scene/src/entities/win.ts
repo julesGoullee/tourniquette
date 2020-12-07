@@ -25,8 +25,6 @@ export class Win extends Entity {
       scale: new Vector3(.2,.2,.2),
       rotation: Quaternion.Euler(0,-90,0)
     })
-    model.withCollisions = false
-    this.addComponent(model)
     this.addComponent(transform)
     this.addComponent(new Animator())
     this.animations.forEach(animation => {
