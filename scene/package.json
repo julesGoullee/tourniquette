@@ -12,8 +12,8 @@
     "ecs:install-next": "npm install --save-dev decentraland-ecs@next"
   },
   "devDependencies": {
-    "@dcl/npc-utils": "^1.0.6",
-    "@dcl/ui-utils": "^1.6.0",
+    "@dcl/npc-utils": "^1.0.7",
+    "@dcl/ui-utils": "^1.6.1",
     "@types/cannon": "^0.1.5",
     "cannon": "github:schteppe/cannon.js",
     "decentraland": "3.4.5-20201009170559.commit-fa9f1c1",

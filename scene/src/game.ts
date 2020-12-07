@@ -774,6 +774,7 @@ class Game implements ISystem {
       this.isPlaying = true
       this.fallenOut = false
       this.hitTourniquetteAllowed = true
+      this.theTourniquette.removeComponent(utils.Delay)
 
     }) )
 
@@ -914,7 +915,12 @@ class Game implements ISystem {
     this.socket.onmessage = (event) => {
 
       const parsed: any = JSON.parse(event.data)
-      log('WebSocket: message', parsed)
+
+      if(parsed.type !== 'PING') {
+
+        log('WebSocket: message', parsed)
+
+      }
 
       switch (parsed.type){
         case 'HELLO': {
