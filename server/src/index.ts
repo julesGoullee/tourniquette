@@ -247,6 +247,9 @@ class Room {
 
     } else if(this.isPlaying && user.isPlaying && !user.fallenOut){
 
+      user.fallenOut = true
+      user.isPlaying = false
+
       this.users.forEach(oneUser => {
 
         if(oneUser.ws.readyState === WebSocket.OPEN && oneUser.id){
