@@ -731,11 +731,11 @@ class Game implements ISystem {
     this.avatarFreezeBoxes.add([
       new Transform({
         position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
-        scale: new Vector3(1, 10, 2)
+        scale: new Vector3(1, 10, 3)
       }),
       new Transform({
         position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
-        scale: new Vector3(1, 10, 2)
+        scale: new Vector3(1, 10, 3)
       }),
       new Transform({
         position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),

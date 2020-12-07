@@ -89,6 +89,7 @@ class User {
       } else {
 
         console.warn('WebSocket: connection dead', this.id)
+        this.ws.close()
         this.disconnect()
 
       }
@@ -236,6 +237,12 @@ class Room {
   }
 
   removeUser(user: User){
+
+    if(!this.users.find(oneUser => oneUser === user) ){
+
+      console.error(`Room: error removedUser, cannot find user ${user.id}`)
+
+    }
 
     this.users = this.users.filter(oneUser => oneUser !== user)
     this.queueUsersReady = this.queueUsersReady.filter(oneUser => oneUser !== user)
