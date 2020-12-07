@@ -59,7 +59,6 @@ class Game implements ISystem {
   rotationSpeed = 50
   teleporter: Teleporter
   countDownBox: CountDownBox
-  hidePassport: Entity
   // avatarHitbox: Entity
   // santa: Santa
   // kdo: Kdo
@@ -87,17 +86,6 @@ class Game implements ISystem {
     this.soundSystem.backgroundMusic()
     this.avatarFreezeBoxes = new AvatarFreezeBoxes()
     this.createGameText()
-    this.createHidePassport()
-
-  }
-
-  createHidePassport(){
-
-    this.hidePassport = new HidePassportBox(new Transform({
-      position: new Vector3(8, 8, 8),
-      scale: new Vector3(16, 16, 16)
-    }), new Vector3(16, 10, 16) )
-
     this.listenSnowBallHit()
 
   }
@@ -114,28 +102,7 @@ class Game implements ISystem {
 
 
   listenSnowBallHit(){
-    this.input.subscribe('BUTTON_DOWN', ActionButton.POINTER, true, (e) => {
-
-      // log(e.hit.entityId, 'hit')
-      if(e.hit.entityId === 'E1k'){ // fire
-
-        return false
-
-      }
-
-      if(e.hit.entityId === 'E15'){ // tourniquette
-
-        return false
-
-      }
-      if(e.hit.entityId === 'E11'){ // lutin
-
-        return false
-
-      }
-      if(!this.userId || !this.camera){
-        return false
-      }
+    this.input.subscribe('BUTTON_DOWN', ActionButton.SECONDARY, true, (e) => {
 
       if(!this.hitSnowBallAllowed){
         log('hit snow ball cooldown')
