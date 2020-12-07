@@ -10,7 +10,26 @@ export class AvatarFreezeBoxes {
 
   }
 
-  add(transforms: Transform[]){
+  add(gameSpot: Vector3){
+
+    const transforms = [
+      new Transform({
+        position: gameSpot.add(new Vector3(1, 5, 0) ),
+        scale: new Vector3(1, 10, 3)
+      }),
+      new Transform({
+        position: gameSpot.add(new Vector3(-1, 5, 0) ),
+        scale: new Vector3(1, 10, 3)
+      }),
+      new Transform({
+        position: gameSpot.add(new Vector3(0, 5, 1) ),
+        scale: new Vector3(2, 10, 1)
+      }),
+      new Transform({
+        position: gameSpot.add(new Vector3(0, 5, -1) ),
+        scale: new Vector3(2, 10, 1)
+      }),
+    ]
 
     transforms.forEach( transform => {
       const box = new AvatarFreezeBox(new BoxShape(), transform)

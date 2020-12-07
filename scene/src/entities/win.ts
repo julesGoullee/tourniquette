@@ -10,11 +10,21 @@ export class Win extends Entity {
     'NAction',
   ]
 
-  constructor(model: GLTFShape, transform: Transform) {
+  constructor() {
 
     super()
     engine.addEntity(this)
     this.setParent(Attachable.AVATAR)
+
+    const model = new GLTFShape('models/win.glb')
+    model.withCollisions = false
+    this.addComponent(model)
+
+    const transform = new Transform({
+      position: new Vector3(0,1,2),
+      scale: new Vector3(.2,.2,.2),
+      rotation: Quaternion.Euler(0,-90,0)
+    })
     model.withCollisions = false
     this.addComponent(model)
     this.addComponent(transform)

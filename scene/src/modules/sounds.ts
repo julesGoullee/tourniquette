@@ -1,4 +1,3 @@
-import {setTimeout} from "../utils";
 import {TheTourniquette} from "../entities/theTourniquette";
 
 // const camera = Camera.instance
@@ -34,7 +33,7 @@ class Sound extends Entity {
     if(transform) {
       this.addComponent(transform)
     } else if(parentEntity) {
-        this.setParent(parentEntity)
+      this.setParent(parentEntity)
     } else {
       this.setParent(Attachable.FIRST_PERSON_CAMERA)
     }
@@ -93,10 +92,7 @@ export class SoundSystem implements ISystem {
     })
     const sound = this.getOrCreateSound('startGame', startGameClip, transform)
     const audioSource = sound.getComponent(AudioSource);
-
-    setTimeout(() => {
-      audioSource.playOnce()
-    }, 1000)
+    audioSource.playOnce()
   }
   failGame() {
     const transform = new Transform({

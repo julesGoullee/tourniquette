@@ -1,3 +1,6 @@
+import {SoundSystem} from "../modules/sounds";
+import {setTimeout} from "../utils";
+
 export class CountDownBox extends Entity {
 
   entity: Entity
@@ -7,11 +10,15 @@ export class CountDownBox extends Entity {
     '3Action',
     '321GO'
   ]
+  soundSystem: SoundSystem
 
-  constructor() {
+  constructor(soundSystem: SoundSystem) {
 
     super()
     engine.addEntity(this)
+
+    this.soundSystem = soundSystem
+
     this.setParent(Attachable.AVATAR)
     this.addComponent(new GLTFShape('models/countDown.glb'))
     this.getComponent(GLTFShape).withCollisions = false
@@ -34,6 +41,10 @@ export class CountDownBox extends Entity {
   }
 
   playCountDown() {
+    setTimeout(() => {
+      this.soundSystem.startGame()
+    }, 1000)
+
     this.animations.forEach(animation => {
       this.getComponent(Animator).getClip(animation).reset()
       this.getComponent(Animator).getClip(animation).play()
