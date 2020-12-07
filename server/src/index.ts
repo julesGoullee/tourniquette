@@ -158,21 +158,21 @@ class User {
 
     this.ws.once('error', (error) => {
 
-      console.error('WebSocket: client error', error)
+      console.error(`WebSocket: client error ${this.id}`, error)
       this.disconnect()
 
     })
 
     this.ws.once('close', () => {
 
-      console.log('WebSocket: client close')
+      console.log(`WebSocket: client close ${this.id}`)
       this.disconnect()
 
     })
 
     this.ws.once('unexpected-response', () => {
 
-      console.log('WebSocket: client unexpected response')
+      console.log(`WebSocket: client unexpected response ${this.id}`)
       this.disconnect()
     })
 
