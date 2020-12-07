@@ -74,6 +74,7 @@ class Game implements ISystem {
 
     this.soundSystem = new SoundSystem()
     this.soundSystem.backgroundMusic()
+    this.soundSystem.backgroundMeteo()
 
     this.canvas = new CornerLabel('').canvas
     new Tutorial(this.canvas)
@@ -194,7 +195,7 @@ class Game implements ISystem {
 
     if(this.userId !== userId){
 
-      ball.addSplasher(this.canvas)
+      ball.addSplasher(this.canvas, this.soundSystem)
 
     }
 
