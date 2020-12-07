@@ -101,7 +101,7 @@ class User {
 
       const parsed = JSON.parse(data.toString() )
 
-      if(['PONG', 'HIT_SNOW_BALL'].includes(parsed.type) ){
+      if(!['PONG', 'HIT_SNOW_BALL'].includes(parsed.type) ){
 
         console.info('WebSocket: client message', { userId: this.id }, parsed)
 
