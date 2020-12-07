@@ -1,5 +1,31 @@
 import { Player } from './Player'
-import {setTimeout} from "../utils";
+import {setTimeout, ITimeoutClean} from "../utils";
+
+export class GameMessage {
+  uiText: UIText
+  timeout: ITimeoutClean | null
+  constructor(canvas: UICanvas) {
+    this.uiText = new UIText(canvas)
+    this.uiText.font = new Font(Fonts.SanFrancisco)
+    this.uiText.fontSize = 30
+    this.uiText.vAlign = 'top'
+    this.uiText.hAlign = 'center'
+
+    this.timeout = null
+  }
+
+  setMessage(text: string) {
+    if(this.timeout) {
+      this.timeout.clearTimeout()
+      this.timeout = null;
+    }
+    this.uiText.value = text
+    this.timeout = setTimeout(() => {
+      this.uiText.value = ''
+      this.timeout = null;
+    }, 5000)
+  }
+}
 
 export function createUserWinnerUI(winner: Player, canvas: UICanvas) {
 

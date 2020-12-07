@@ -19,7 +19,7 @@ import {PhysicsWorld} from './modules/physicsWorld'
 import { AvatarFreezeBoxes } from './modules/AvatarFreezeBoxes'
 import { Win } from './entities/win'
 import { Lose } from './entities/lose'
-import {createUserWinnerUI} from "./modules/ui";
+import {createUserWinnerUI, GameMessage} from "./modules/ui";
 
 class Game implements ISystem {
 
@@ -34,7 +34,7 @@ class Game implements ISystem {
   camera: Camera = Camera.instance
   input = Input.instance
   canvas: UICanvas
-  gameText: UIText
+  gameMessage: GameMessage
   userWinnerImg: UIImage
   userContainer: UIContainerStack
   isPlaying = false
@@ -102,11 +102,7 @@ class Game implements ISystem {
 
   createGameText() {
 
-    this.gameText = new UIText(this.canvas)
-    this.gameText.font = new Font(Fonts.SanFrancisco)
-    this.gameText.fontSize = 30
-    this.gameText.vAlign = 'top'
-    this.gameText.hAlign = 'center'
+    this.gameMessage = new GameMessage(this.canvas)
 
   }
 
@@ -249,7 +245,7 @@ class Game implements ISystem {
   start(players: [PlayersData] ){
 
     this.teleporter.gamePlaying(true)
-    this.gameText.value = ''
+    this.gameMessage.setMessage('')
     this.hitTourniquetteAllowed = false
 
     let userPosition = -1
@@ -300,7 +296,7 @@ class Game implements ISystem {
     if(this.theTourniquette.hasComponent(utils.Delay) ){ // end before delay start finish
 
       log('end before delay start finish')
-      this.gameText.value = 'Everyone left!'
+      this.gameMessage.setMessage('Everyone left!')
       this.theTourniquette.getComponent(utils.Delay).setCallback(null)
       this.soundSystem.backgroundMusic(true)
       this.avatarFreezeBoxes.remove()
