@@ -25,6 +25,7 @@ import { SoundSystem } from './modules/sounds'
 // import { Kdo } from './entities/kdo'
 import { CountDownBox } from './entities/countDown'
 import { HidePassportBox } from './entities/hidePassportBox'
+import { AvatarFreezeBoxes } from './modules/AvatarFreezeBoxes'
 
 class Game implements ISystem {
 
@@ -64,7 +65,7 @@ class Game implements ISystem {
   xmasBall: Entity
   pilones: Entity[] = []
   snowBalls: SnowBallHit[] = []
-  avatarFreezeBoxes: AvatarFreezeBox[] = []
+  avatarFreezeBoxes: AvatarFreezeBoxes
   theTourniquette: Entity
   theTourniquetteCollider: Entity
   rotationSpeed = 50
@@ -96,6 +97,7 @@ class Game implements ISystem {
     this.createCountDown()
     this.soundSystem = new SoundSystem()
     this.soundSystem.backgroundMusic()
+    this.avatarFreezeBoxes = new AvatarFreezeBoxes()
     this.createGameText()
     this.createHidePassport()
 
@@ -709,7 +711,6 @@ class Game implements ISystem {
     this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0, 45, 0)
 
     let userPosition = -1
-    this.avatarFreezeBoxes = []
     this.playersInGame = players.map( (playersData, i) => {
       const player = new Player(playersData.id, playersData.displayName, i)
       if(player.id === this.userId){
@@ -727,22 +728,24 @@ class Game implements ISystem {
 
     movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: -14 * 16 + 8, y: 18, z: -120 * 16 +8 })
     // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
-    this.avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
-      position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
-      scale: new Vector3(1, 10, 2)
-    }) ) )
-    this.avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
-      position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
-      scale: new Vector3(1, 10, 2)
-    }) ) )
-    this.avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
-      position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),
-      scale: new Vector3(2, 10, 1)
-    }) ) )
-    this.avatarFreezeBoxes.push(new AvatarFreezeBox(new BoxShape(), new Transform({
-      position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
-      scale: new Vector3(2, 10, 1)
-    }) ) )
+    this.avatarFreezeBoxes.add([
+      new Transform({
+        position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
+        scale: new Vector3(1, 10, 2)
+      }),
+      new Transform({
+        position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
+        scale: new Vector3(1, 10, 2)
+      }),
+      new Transform({
+        position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),
+        scale: new Vector3(2, 10, 1)
+      }),
+      new Transform({
+        position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
+        scale: new Vector3(2, 10, 1)
+      }),
+    ])
 
     this.countDownBox.playCountDown()
     this.soundSystem.backgroundMusic(false)
@@ -750,7 +753,6 @@ class Game implements ISystem {
 
     this.theTourniquette.addComponent(new utils.Delay(4000, () => {
 
-      this.avatarFreezeBoxes.forEach(avatarFreezeBox => engine.removeEntity(avatarFreezeBox) )
       this.rotationSpeed = 50
       this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotationSpeed, 0) ) )
 
@@ -804,7 +806,7 @@ class Game implements ISystem {
       this.gameText.value = 'Everyone left!'
       this.theTourniquette.getComponent(utils.Delay).setCallback(null)
       this.soundSystem.backgroundMusic(true)
-      this.avatarFreezeBoxes.forEach(avatarFreezeBox => engine.removeEntity(avatarFreezeBox) )
+      this.avatarFreezeBoxes.remove()
 
     }
 
