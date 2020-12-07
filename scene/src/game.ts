@@ -1,6 +1,6 @@
 import { getCurrentRealm } from '@decentraland/EnvironmentAPI'
 import utils from '../node_modules/decentraland-ecs-utils/index'
-import {movePlayerTo} from '@decentraland/RestrictedActions'
+import { movePlayerTo } from '@decentraland/RestrictedActions'
 import { getUserData } from '@decentraland/Identity'
 import { CornerLabel } from '../node_modules/@dcl/ui-utils/index'
 
@@ -22,8 +22,8 @@ import { Win } from './entities/win'
 import { Lose } from './entities/lose'
 class Game implements ISystem {
 
-  // webSocketUrl = 'ws://192.168.100.4:13370'
-  webSocketUrl = 'ws://localhost:13370'
+  webSocketUrl = 'ws://192.168.100.7:13370'
+  // webSocketUrl = 'ws://localhost:13370'
   // webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
@@ -34,6 +34,8 @@ class Game implements ISystem {
   input = Input.instance
   canvas: UICanvas
   gameText: UIText
+  userWinnerImg: UIImage
+  userContainer: UIContainerStack
   isPlaying = false
   fallenOut = false
   hitTourniquetteAllowed = false
@@ -90,7 +92,6 @@ class Game implements ISystem {
     this.soundSystem.backgroundMusic()
     this.avatarFreezeBoxes = new AvatarFreezeBoxes()
     this.createGameText()
-    this.listenSnowBallHit()
 
   }
 
@@ -104,6 +105,40 @@ class Game implements ISystem {
 
   }
 
+  createUserWinnerUI(winner) {
+
+    const userWinnerText = new UIText(this.canvas)
+    userWinnerText.value = `${winner.displayName} won the game !`
+
+    userWinnerText.positionX = -50
+    userWinnerText.positionY = 200
+    userWinnerText.vAlign = 'center'
+    userWinnerText.hAlign = 'center'
+    userWinnerText.fontSize = 30
+    userWinnerText.color = Color4.White()
+
+
+    const imageAtlas = 'images/couronne.png'
+    const imageTexture = new Texture(imageAtlas)
+    const userWinnerImg = new UIImage(this.canvas, imageTexture)
+    userWinnerImg.opacity = 1
+    userWinnerImg.isPointerBlocker = false
+    userWinnerImg.name = "clickable-image"
+    userWinnerImg.width = '100px'
+    userWinnerImg.height = '100px'
+    userWinnerImg.sourceWidth = 600
+    userWinnerImg.sourceHeight = 600
+    userWinnerImg.vAlign = 'center'
+    userWinnerImg.hAlign = 'center'
+    userWinnerImg.positionX = -150
+    userWinnerImg.positionY = 200
+
+    setTimeout(() => {
+      userWinnerText.value = ''
+      userWinnerImg.opacity = 0
+    }, 3000)
+
+  }
 
   listenSnowBallHit(){
     this.input.subscribe('BUTTON_DOWN', ActionButton.SECONDARY, true, (e) => {
@@ -420,7 +455,7 @@ class Game implements ISystem {
       } else if(userWinner){
 
         const winner = this.playersInGame.filter(p => p.id === userWinner)[0]
-        this.gameText.value = `${winner.displayName} won the game !`
+        this.createUserWinnerUI(winner)
 
       }
 
