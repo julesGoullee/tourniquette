@@ -12,11 +12,7 @@ export class Tutorial {
     this.prompt = new ui.CustomPrompt(PromptStyles.DARKLARGE, 800, 600)
     this.prompt.closeIcon.width = 0
     this.prompt.closeIcon.height = 0
-    // this.prompt.addText('Jump', -300, -170, Color4.White(), 30)
-    // this.prompt.addText(`     Throw
-    //  snowball`, -20, -190, Color4.White(), 30)
-    // this.prompt.addText(`    Reverse
-    // rotation`, 270, -190, Color4.White(), 30)
+    this.prompt.addText(`La Tourniquette`, 0, 270, Color4.White(), 30)
     const imageJump = new UIImage(this.canvas, new Texture('images/jump.png') )
     imageJump.width = 200
     imageJump.height = 400
