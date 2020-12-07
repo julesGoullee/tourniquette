@@ -73,6 +73,7 @@ export class TheTourniquette extends Entity {
     const onPointerDown = new OnPointerDown(
       onClick,
       {
+        button: ActionButton.PRIMARY,
         hoverText: '',
         showFeedback: false,
         distance: 4
