@@ -76,6 +76,7 @@ class Game implements ISystem {
     this.soundSystem.backgroundMusic()
 
     this.canvas = new CornerLabel('').canvas
+    new Tutorial(this.canvas)
     // this.createGround()
     new XmasBall()
     new Lutin()
@@ -97,7 +98,6 @@ class Game implements ISystem {
 
     this.createGameText()
     this.listenSnowBallHit()
-    new Tutorial(this.canvas)
 
   }
 
