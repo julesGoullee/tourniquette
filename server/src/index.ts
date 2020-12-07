@@ -312,7 +312,12 @@ class Room {
     const players = this.users.filter(oneUser => oneUser.isPlaying).map(oneUser => {
       return { id: oneUser.id, displayName: oneUser.displayName }
     })
-    console.log('Start game', { players: players.map(player => player.id ), users: this.users.map(user => user.id) })
+    console.log('Start game', {
+      players: players.map(player => player.id ),
+      users: this.users.map(user => user.id),
+      queueAll: this.queueUsersReady.map(user => user.id),
+      queue: this.queueUsersReady.filter(user => !user.isOutsideParcel() || user === userInit).map(user => user.id),
+    })
 
     this.users.forEach( (oneUser: User) => {
 
@@ -331,7 +336,7 @@ class Room {
 
   playerReady(user: User){
 
-    if(!user.isPlaying && !this.queueUsersReady.find(oneUser => oneUser === user) ){
+    if(!this.queueUsersReady.find(oneUser => oneUser === user) ){
 
       console.info(`Room: ${user.id} ready`)
       this.queueUsersReady.push(user)
@@ -373,7 +378,12 @@ class Room {
         oneUser.isPlaying = false
         oneUser.fallenOut = false
         oneUser.hitTourniquetteAllowed = false
-        this.queueUsersReady.push(oneUser)
+
+        if(!this.queueUsersReady.find(otherOneUser => otherOneUser === oneUser) ) {
+
+          this.queueUsersReady.push(oneUser)
+
+        }
 
       }
 
