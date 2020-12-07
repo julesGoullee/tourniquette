@@ -312,7 +312,7 @@ class Room {
     const players = this.users.filter(oneUser => oneUser.isPlaying).map(oneUser => {
       return { id: oneUser.id, displayName: oneUser.displayName }
     })
-    console.log('Start game', { players: players.map(player => player.id ) })
+    console.log('Start game', { players: players.map(player => player.id ), users: this.users.map(user => user.id) })
 
     this.users.forEach( (oneUser: User) => {
 
