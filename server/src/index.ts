@@ -158,21 +158,21 @@ class User {
 
     this.ws.once('error', (error) => {
 
-      console.error('WebSocket: client error', error)
+      console.error(`WebSocket: client error ${this.id}`, error)
       this.disconnect()
 
     })
 
     this.ws.once('close', () => {
 
-      console.log('WebSocket: client close')
+      console.log(`WebSocket: client close ${this.id}`)
       this.disconnect()
 
     })
 
     this.ws.once('unexpected-response', () => {
 
-      console.log('WebSocket: client unexpected response')
+      console.log(`WebSocket: client unexpected response ${this.id}`)
       this.disconnect()
     })
 
@@ -247,6 +247,9 @@ class Room {
 
     } else if(this.isPlaying && user.isPlaying && !user.fallenOut){
 
+      user.fallenOut = true
+      user.isPlaying = false
+
       this.users.forEach(oneUser => {
 
         if(oneUser.ws.readyState === WebSocket.OPEN && oneUser.id){
@@ -299,17 +302,18 @@ class Room {
       oneUser.hitTourniquetteAllowed = true
     })
 
+    const players = this.users.filter(oneUser => oneUser.isPlaying).map(oneUser => {
+      return { id: oneUser.id, displayName: oneUser.displayName }
+    })
+    console.log('Start game', { players: players.map(player => player.id ) })
+
     this.users.forEach( (oneUser: User) => {
 
       if(oneUser.ws.readyState === WebSocket.OPEN){
 
         oneUser.ws.send(JSON.stringify({
           type: 'START',
-          data: {
-            players: this.users.filter(oneUser => oneUser.isPlaying).map(oneUser => {
-              return { id: oneUser.id, displayName: oneUser.displayName }
-            })
-          }
+          data: { players }
         }) )
 
       }
