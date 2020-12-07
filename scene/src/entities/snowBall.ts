@@ -1,6 +1,7 @@
 import {PhysicsWorld} from "../modules/physicsWorld";
 import utils from '../../node_modules/decentraland-ecs-utils/index'
 import {setInterval} from "../utils";
+import {SoundSystem} from "../modules/sounds";
 
 
 const vectorScale = 75
@@ -76,13 +77,14 @@ export class SnowBall extends Entity {
 
   }
 
-  addSplasher(canvas: UICanvas) {
+  addSplasher(canvas: UICanvas, soundSystem: SoundSystem) {
     this.addComponent(
       new utils.TriggerComponent(
         new utils.TriggerBoxShape(new Vector3(0.2, 0.2, 0.2), Vector3.Zero() ),
         null, null, null, null,
         () => {
 
+          soundSystem.snowBallSplash()
           const imageAtlas = 'images/snowBall.png'
           const imageTexture = new Texture(imageAtlas)
           const snowSplash = new UIImage(canvas, imageTexture)

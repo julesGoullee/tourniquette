@@ -27,6 +27,22 @@ class TheTourniquetteCollider extends Entity {
 
 }
 
+class TheTourniquetteGrelot extends Entity {
+
+  constructor() {
+
+    super()
+
+    const transform = new Transform({
+      position: new Vector3(-6, 4, 0),
+    })
+
+    this.addComponent(transform)
+
+  }
+
+}
+
 export class TheTourniquetteModel extends Entity {
 
   constructor() {
@@ -43,6 +59,7 @@ export class TheTourniquette extends Entity {
 
   theTourniquetteModel: TheTourniquetteModel
   theTourniquetteCollider: TheTourniquetteCollider
+  theTourniquetteGrelot: TheTourniquetteGrelot
 
   rotationSpeed: number
   soundSystem: SoundSystem
@@ -68,6 +85,9 @@ export class TheTourniquette extends Entity {
     this.theTourniquetteModel.setParent(this)
     this.theTourniquetteCollider = new TheTourniquetteCollider()
     this.theTourniquetteCollider.setParent(this)
+    this.theTourniquetteGrelot = new TheTourniquetteGrelot()
+    this.theTourniquetteGrelot.setParent(this)
+    this.soundSystem.grelots(this.theTourniquetteGrelot)
 
 
     const onPointerDown = new OnPointerDown(
