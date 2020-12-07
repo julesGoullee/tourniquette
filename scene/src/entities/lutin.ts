@@ -96,7 +96,6 @@ export class Lutin extends Entity {
         isEndOfDialog: true,
         triggeredByNext: () => {
           this.isEndDialog = true
-          log('trigger by next')
         }
       },
       {
@@ -112,7 +111,10 @@ export class Lutin extends Entity {
     ]
 
     const lutin = new NPC(
-      { position: new Vector3(12.5, 1, 1.5) },
+      {
+        position: new Vector3(12.5, 1, 1.5),
+        rotation: Quaternion.Euler(0, 0 , 0)
+      },
       'models/lutin.glb',
       () => {
         if(!this.isEndDialog){
@@ -128,12 +130,11 @@ export class Lutin extends Entity {
         darkUI: true,
         coolDownDuration: 3,
         hoverText: 'CHAT',
-        onlyExternalTrigger: false,
-        reactDistance: 5,
+        // onlyClickTrigger: true,
+        // onlyExternalTrigger: false,
+        reactDistance: 1,
         continueOnWalkAway: false,
-        onWalkAway: () => {
-          log('walked away')
-        },
+        // onWalkAway: () => {},
       }
     )
   }

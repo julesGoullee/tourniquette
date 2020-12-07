@@ -19,7 +19,8 @@ import {PhysicsWorld} from './modules/physicsWorld'
 import { AvatarFreezeBoxes } from './modules/AvatarFreezeBoxes'
 import { Win } from './entities/win'
 import { Lose } from './entities/lose'
-import {createUserWinnerUI, GameMessage} from "./modules/ui";
+import {createUserWinnerUI, GameMessage} from './modules/ui'
+import {Tutorial} from './modules/Tutorial'
 
 class Game implements ISystem {
 
@@ -87,7 +88,6 @@ class Game implements ISystem {
       this.onSocketFailed()
     })
 
-
     this.avatarFreezeBoxes = new AvatarFreezeBoxes()
 
     this.createTheTourniquette()
@@ -97,6 +97,7 @@ class Game implements ISystem {
 
     this.createGameText()
     this.listenSnowBallHit()
+    new Tutorial(this.canvas)
 
   }
 
