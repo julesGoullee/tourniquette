@@ -6,7 +6,6 @@ import { CornerLabel } from '../node_modules/@dcl/ui-utils/index'
 
 import { Player, PlayersData } from './modules/Player'
 import { TheTourniquette } from './entities/theTourniquette'
-import { TheTourniquetteCollider } from './entities/theTourniquetteCollider'
 import { ThePilones } from './entities/pilones'
 import { Teleporter } from './entities/teleporter'
 import { XmasBall } from './entities/xmasBall'
@@ -20,10 +19,12 @@ import {PhysicsWorld} from './modules/physicsWorld'
 import { AvatarFreezeBoxes } from './modules/AvatarFreezeBoxes'
 import { Win } from './entities/win'
 import { Lose } from './entities/lose'
+import {createUserWinnerUI} from "./modules/ui";
+
 class Game implements ISystem {
 
-  webSocketUrl = 'ws://192.168.100.7:13370'
-  // webSocketUrl = 'ws://localhost:13370'
+  // webSocketUrl = 'ws://192.168.100.4:13370'
+  webSocketUrl = 'ws://localhost:13370'
   // webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
@@ -56,8 +57,7 @@ class Game implements ISystem {
   pilones: Entity[] = []
   snowBalls: SnowBall[] = []
   avatarFreezeBoxes: AvatarFreezeBoxes
-  theTourniquette: Entity
-  theTourniquetteCollider: Entity
+  theTourniquette: TheTourniquette
   rotationSpeed = 50
   teleporter: Teleporter
   countDownBox: CountDownBox
@@ -71,27 +71,32 @@ class Game implements ISystem {
 
   constructor() {
 
+    this.soundSystem = new SoundSystem()
+    this.soundSystem.backgroundMusic()
+
     this.canvas = new CornerLabel('').canvas
     // this.createGround()
-    this.createXmasBall()
-    this.createTheTourniquette()
+    new XmasBall()
+    new Lutin()
+
     this.createThePilones()
     this.createTeleporter()
-    this.createPhysicsWorld()
+    this.physicsWorld = new PhysicsWorld()
     this.joinSocketsServer().catch(error => {
       log('error join socket server', error)
       this.onSocketFailed()
     })
-    this.createLutin()
-    // this.createKdo()
-    // this.createAvatarHitbox()
-    this.createCountDown()
-    this.createWin()
-    this.createLose()
-    this.soundSystem = new SoundSystem()
-    this.soundSystem.backgroundMusic()
+
+
     this.avatarFreezeBoxes = new AvatarFreezeBoxes()
+
+    this.createTheTourniquette()
+    this.countDownBox = new CountDownBox(this.soundSystem)
+    this.win = new Win()
+    this.lose = new Lose()
+
     this.createGameText()
+    this.listenSnowBallHit()
 
   }
 
@@ -102,41 +107,6 @@ class Game implements ISystem {
     this.gameText.fontSize = 30
     this.gameText.vAlign = 'top'
     this.gameText.hAlign = 'center'
-
-  }
-
-  createUserWinnerUI(winner) {
-
-    const userWinnerText = new UIText(this.canvas)
-    userWinnerText.value = `${winner.displayName} won the game !`
-
-    userWinnerText.positionX = -50
-    userWinnerText.positionY = 200
-    userWinnerText.vAlign = 'center'
-    userWinnerText.hAlign = 'center'
-    userWinnerText.fontSize = 30
-    userWinnerText.color = Color4.White()
-
-
-    const imageAtlas = 'images/couronne.png'
-    const imageTexture = new Texture(imageAtlas)
-    const userWinnerImg = new UIImage(this.canvas, imageTexture)
-    userWinnerImg.opacity = 1
-    userWinnerImg.isPointerBlocker = false
-    userWinnerImg.name = "clickable-image"
-    userWinnerImg.width = '100px'
-    userWinnerImg.height = '100px'
-    userWinnerImg.sourceWidth = 600
-    userWinnerImg.sourceHeight = 600
-    userWinnerImg.vAlign = 'center'
-    userWinnerImg.hAlign = 'center'
-    userWinnerImg.positionX = -150
-    userWinnerImg.positionY = 200
-
-    setTimeout(() => {
-      userWinnerText.value = ''
-      userWinnerImg.opacity = 0
-    }, 3000)
 
   }
 
@@ -173,37 +143,6 @@ class Game implements ISystem {
 
     })
 
-  }
-
-  createPhysicsWorld(){
-
-    this.physicsWorld = new PhysicsWorld()
-
-  }
-
-  createCountDown() {
-    this.countDownBox = new CountDownBox()
-  }
-
-  createWin() {
-    this.win = new Win(new GLTFShape('models/win.glb'), new Transform({
-      position: new Vector3(0,1,2),
-      scale: new Vector3(.2,.2,.2),
-      rotation: Quaternion.Euler(0,-90,0)
-    }) )
-
-  }
-
-  createLose() {
-    this.lose = new Lose(new GLTFShape('models/lose.glb'), new Transform({
-      position: new Vector3(0,1,2),
-      scale: new Vector3(.2,.2,.2),
-      rotation: Quaternion.Euler(0,-90,0)
-    }) )
-  }
-
-  createLutin(){
-    new Lutin()
   }
 
   update(dt: number): void {
@@ -267,51 +206,27 @@ class Game implements ISystem {
     log('Fire snow ball')
   }
 
-  createXmasBall(){
-    this.xmasBall = new XmasBall(new GLTFShape('models/xmasBall.glb'), new Transform({
-      position: new Vector3(8, -0.11, 8),
-      scale:  new Vector3(1, 1, 1)
-    }) )
-  }
-
   createTheTourniquette(){
-    this.theTourniquette = new TheTourniquette(new GLTFShape('models/sucreDorge.glb'), new Transform({
-      //position: new Vector3(8, 13, 8),
-      position: new Vector3(8, 12, 8),
-      scale:  new Vector3(1, 1, 1),
-      rotation: Quaternion.Euler(0,45,0)
-    }) )
-    this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, 100, 0) ) )
 
-    this.theTourniquetteCollider = new TheTourniquetteCollider(new BoxShape(), this.theTourniquette, new Transform({
-      position: new Vector3(0, 0.6, 0),
-      scale: new Vector3(14, 1, 0.04),
-      rotation: Quaternion.Euler(0,0,0)
-    }) )
-    const onPointerDown = new OnPointerDown(
-      (e) => {
+    this.theTourniquette = new TheTourniquette(this.soundSystem, () => {
 
-        if(this.isPlaying && !this.fallenOut && this.hitTourniquetteAllowed){
+      if(this.isPlaying && !this.fallenOut && this.hitTourniquetteAllowed){
 
-          onPointerDown.hoverText = ''
-          onPointerDown.showFeedback = false
-          this.hitTourniquetteAllowed = false
-          setTimeout(() => {
+        this.theTourniquette.disableClick()
+        this.hitTourniquetteAllowed = false
 
-            this.hitTourniquetteAllowed = true
-            onPointerDown.hoverText = 'Reverse'
-            onPointerDown.showFeedback = true
+        setTimeout(() => {
 
-          }, 2 * 1000)
+          this.theTourniquette.enableClick()
+          this.hitTourniquetteAllowed = true
 
-          this.sendSocket('HIT')
-        }
-      }, {
-        hoverText: 'Reverse',
-        showFeedback: true,
-        distance: 4
-      })
-    this.theTourniquetteCollider.addComponent(onPointerDown)
+        }, 2 * 1000)
+
+        this.sendSocket('HIT')
+      }
+    })
+
+    this.theTourniquette.startNormalRotation()
 
   }
 
@@ -336,12 +251,6 @@ class Game implements ISystem {
     this.teleporter.gamePlaying(true)
     this.gameText.value = ''
     this.hitTourniquetteAllowed = false
-    if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
-
-      this.theTourniquette.getComponent(utils.KeepRotatingComponent).stop()
-
-    }
-    this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0, 45, 0)
 
     let userPosition = -1
     this.playersInGame = players.map( (playersData, i) => {
@@ -359,51 +268,18 @@ class Game implements ISystem {
 
     }
 
+    this.theTourniquette.resetRotation()
+
     movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: -14 * 16 + 8, y: 18, z: -120 * 16 +8 })
     // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
-    this.avatarFreezeBoxes.add([
-      new Transform({
-        position: this.gameSpots[userPosition].add(new Vector3(1, 5, 0) ),
-        scale: new Vector3(1, 10, 3)
-      }),
-      new Transform({
-        position: this.gameSpots[userPosition].add(new Vector3(-1, 5, 0) ),
-        scale: new Vector3(1, 10, 3)
-      }),
-      new Transform({
-        position: this.gameSpots[userPosition].add(new Vector3(0, 5, 1) ),
-        scale: new Vector3(2, 10, 1)
-      }),
-      new Transform({
-        position: this.gameSpots[userPosition].add(new Vector3(0, 5, -1) ),
-        scale: new Vector3(2, 10, 1)
-      }),
-    ])
+    this.avatarFreezeBoxes.add(this.gameSpots[userPosition])
 
     this.countDownBox.playCountDown()
     this.soundSystem.backgroundMusic(false)
-    this.soundSystem.startGame()
 
     this.theTourniquette.addComponent(new utils.Delay(4000, () => {
 
-      this.rotationSpeed = 50
-      this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotationSpeed, 0) ) )
-
-      this.theTourniquette.addComponentOrReplace(new utils.Interval(3000,() => {
-
-        if(Math.abs(this.rotationSpeed) < 100){
-
-          this.rotationSpeed = this.rotationSpeed > 0 ? this.rotationSpeed + 5 : this.rotationSpeed - 5
-          this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotationSpeed, 0) ) )
-
-        } else {
-
-          this.theTourniquette.getComponent(utils.Interval).setCallback(null)
-
-        }
-
-      }) )
-
+      this.theTourniquette.startGameRotation()
       this.soundSystem.gameMusic(true)
 
       this.isPlaying = true
@@ -419,18 +295,7 @@ class Game implements ISystem {
     this.teleporter.gamePlaying(false)
     this.soundSystem.endGame()
 
-    if(this.theTourniquette.hasComponent(utils.KeepRotatingComponent) ){
-
-      this.theTourniquette.getComponent(utils.KeepRotatingComponent).stop()
-      this.theTourniquette.getComponent(Transform).rotation = Quaternion.Euler(0,45,0)
-
-    }
-
-    if(this.theTourniquette.hasComponent(utils.Interval) ){
-
-      this.theTourniquette.getComponent(utils.Interval).setCallback(null)
-
-    }
+    this.theTourniquette.startNormalRotation()
 
     if(this.theTourniquette.hasComponent(utils.Delay) ){ // end before delay start finish
 
@@ -455,7 +320,7 @@ class Game implements ISystem {
       } else if(userWinner){
 
         const winner = this.playersInGame.filter(p => p.id === userWinner)[0]
-        this.createUserWinnerUI(winner)
+        createUserWinnerUI(winner, this.canvas)
 
       }
 
@@ -591,11 +456,9 @@ class Game implements ISystem {
         }
         case 'CHANGE_DIRECTION': {
 
-          this.rotationSpeed = parsed.data.sign === '+' ? Math.abs(this.rotationSpeed) : -this.rotationSpeed
-          this.theTourniquette.addComponentOrReplace(new utils.KeepRotatingComponent(Quaternion.Euler(0, this.rotationSpeed, 0) ) )
-
-          this.soundSystem.reverseTourniquette(this.theTourniquette)
+          this.theTourniquette.invertRotation(parsed.data.sign)
           break
+
         }
       }
 
