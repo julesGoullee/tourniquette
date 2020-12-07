@@ -2,13 +2,13 @@ export class CountDownBox extends Entity {
 
   entity: Entity
 
-  constructor(model: GLTFShape) {
+  constructor() {
 
     super()
     engine.addEntity(this)
     this.setParent(Attachable.AVATAR)
 
-    this.addComponent(model)
+    this.addComponent(new GLTFShape('models/countDown.glb'))
     this.addComponent(new Transform())
     // this.getComponent(Transform).position = new Vector3(3, 0, 0)
     this.getComponent(Transform).position = new Vector3(0,1,3)
