@@ -69,6 +69,9 @@ class User {
       type: 'HELLO',
       data: {
         isPlaying: this.room.isPlaying,
+        players: this.room.users.filter(oneUser => oneUser.isPlaying).map(oneUser => {
+          return { id: oneUser.id, displayName: oneUser.displayName }
+        })
       }
     }) )
 
@@ -98,7 +101,11 @@ class User {
 
       const parsed = JSON.parse(data.toString() )
 
-      console.info('WebSocket: client message', { userId: this.id }, parsed)
+      if(parsed.type !== 'PONG'){
+
+        console.info('WebSocket: client message', { userId: this.id }, parsed)
+
+      }
 
       switch (parsed.type){
 
