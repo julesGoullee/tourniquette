@@ -1,46 +1,54 @@
+import {SoundSystem} from "../modules/sounds";
+import {setTimeout} from "../utils";
+
 export class CountDownBox extends Entity {
 
   entity: Entity
+  animations = [
+    '1Action',
+    '2Action',
+    '3Action',
+    '321GO'
+  ]
+  soundSystem: SoundSystem
 
-  constructor(model: GLTFShape) {
+  constructor(soundSystem: SoundSystem) {
 
     super()
     engine.addEntity(this)
+
+    this.soundSystem = soundSystem
+
     this.setParent(Attachable.AVATAR)
+    this.addComponent(new GLTFShape('models/countDown.glb'))
+    this.getComponent(GLTFShape).withCollisions = false
 
-    this.addComponent(model)
-    this.addComponent(new Transform())
-    // this.getComponent(Transform).position = new Vector3(3, 0, 0)
-    this.getComponent(Transform).position = new Vector3(0,1,3)
-    this.getComponent(Transform).scale = new Vector3(.5,.5,.5)
-    this.getComponent(Transform).rotation = new Quaternion(0,180,0)
-    this.addComponent(new Animator());
-    const action1 = new AnimationState("1Action")
-    const action2 = new AnimationState("2Action")
-    const action3 = new AnimationState("3Action")
-    const go = new AnimationState("321GO")
-    action1.looping = false
-    action2.looping = false
-    action3.looping = false
-    go.looping = false
-    this.getComponent(Animator).addClip(action1)
-    this.getComponent(Animator).addClip(action2)
-    this.getComponent(Animator).addClip(action3)
-    this.getComponent(Animator).addClip(go)
+    this.addComponent(new Transform({
+      position: new Vector3(0,1,3),
+      scale: new Vector3(.5,.5,.5),
+      rotation: new Quaternion(0,180,0)
+    }) )
 
+    this.addComponent(new Animator())
+    this.animations.forEach(animation => {
+      const animationState = new AnimationState(animation)
+      animationState.looping = false
+      // animationState.playing = false
+      this.getComponent(Animator).addClip(animationState)
+      this.getComponent(Animator).getClip(animation).reset()
+    })
 
   }
 
   playCountDown() {
-    this.getComponent(Animator).getClip('1Action').reset()
-    this.getComponent(Animator).getClip('2Action').reset()
-    this.getComponent(Animator).getClip('3Action').reset()
-    this.getComponent(Animator).getClip('321GO').reset()
+    setTimeout(() => {
+      this.soundSystem.startGame()
+    }, 1000)
 
-    this.getComponent(Animator).getClip('1Action').play()
-    this.getComponent(Animator).getClip('2Action').play()
-    this.getComponent(Animator).getClip('3Action').play()
-    this.getComponent(Animator).getClip('321GO').play()
+    this.animations.forEach(animation => {
+      this.getComponent(Animator).getClip(animation).reset()
+      this.getComponent(Animator).getClip(animation).play()
+    })
   }
 
 }
