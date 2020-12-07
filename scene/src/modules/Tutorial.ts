@@ -12,27 +12,35 @@ export class Tutorial {
     this.prompt = new ui.CustomPrompt(PromptStyles.DARKLARGE, 800, 600)
     this.prompt.closeIcon.width = 0
     this.prompt.closeIcon.height = 0
-    this.prompt.addText(`La Tourniquette`, 0, 270, Color4.White(), 30)
-    const imageJump = new UIImage(this.canvas, new Texture('images/jump.png') )
+
+    const imageTitle = new UIImage(this.canvas, new Texture('images/title.png') )
+    imageTitle.width = 283
+    imageTitle.height = 65
+    imageTitle.positionX = 0
+    imageTitle.positionY = 250
+    imageTitle.sourceWidth = 283
+    imageTitle.sourceHeight = 65
+
+    const imageJump = new UIImage(this.canvas, new Texture('images/jump.jpg') )
     imageJump.width = 200
     imageJump.height = 400
-    imageJump.positionY = 30
+    imageJump.positionY = 10
     imageJump.positionX = -260
     imageJump.sourceWidth = 366
     imageJump.sourceHeight = 840
 
-    const imageThrowSnowBall = new UIImage(this.canvas, new Texture('images/swap.png') )
+    const imageThrowSnowBall = new UIImage(this.canvas, new Texture('images/swap.jpg') )
     imageThrowSnowBall.width = 200
     imageThrowSnowBall.height = 400
-    imageThrowSnowBall.positionY = 30
+    imageThrowSnowBall.positionY = 10
     imageThrowSnowBall.positionX = 0
     imageThrowSnowBall.sourceWidth = 366
     imageThrowSnowBall.sourceHeight = 840
 
-    const imageReverseRotation = new UIImage(this.canvas, new Texture('images/throw-ball.png') )
+    const imageReverseRotation = new UIImage(this.canvas, new Texture('images/throw-ball.jpg') )
     imageReverseRotation.width = 200
     imageReverseRotation.height = 400
-    imageReverseRotation.positionY = 30
+    imageReverseRotation.positionY = 10
     imageReverseRotation.positionX = 250
     imageReverseRotation.sourceWidth = 366
     imageReverseRotation.sourceHeight = 840
