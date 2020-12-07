@@ -299,17 +299,18 @@ class Room {
       oneUser.hitTourniquetteAllowed = true
     })
 
+    const players = this.users.filter(oneUser => oneUser.isPlaying).map(oneUser => {
+      return { id: oneUser.id, displayName: oneUser.displayName }
+    })
+    console.log('Start game', { players: players.map(player => player.id ) })
+
     this.users.forEach( (oneUser: User) => {
 
       if(oneUser.ws.readyState === WebSocket.OPEN){
 
         oneUser.ws.send(JSON.stringify({
           type: 'START',
-          data: {
-            players: this.users.filter(oneUser => oneUser.isPlaying).map(oneUser => {
-              return { id: oneUser.id, displayName: oneUser.displayName }
-            })
-          }
+          data: { players }
         }) )
 
       }
