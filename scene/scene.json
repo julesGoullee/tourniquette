@@ -1,7 +1,8 @@
 {
   "display": {
     "title": "Tourniquette",
-    "favicon": "favicon_asset"
+    "favicon": "favicon_asset",
+    "navmapThumbnail":  "https://gateway.pinata.cloud/ipfs/QmYn8ZRMPmExGj5NDB1kQJubfetbmU6LPVhcfgKxTRD1qU"
   },
   "contact": {
     "name": "author-name",

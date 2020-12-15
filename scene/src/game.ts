@@ -1,4 +1,5 @@
 import { getCurrentRealm } from '@decentraland/EnvironmentAPI'
+import { getParcel } from "@decentraland/ParcelIdentity"
 import utils from '../node_modules/decentraland-ecs-utils/index'
 import { movePlayerTo } from '@decentraland/RestrictedActions'
 import { getUserData } from '@decentraland/Identity'
@@ -365,16 +366,16 @@ class Game implements ISystem {
 
   async joinSocketsServer() {
 
-    const realm = await getCurrentRealm()
+    const [realm, userData, parcel] = await Promise.all([getCurrentRealm(), getUserData(), getParcel()])
     log(`You are in the realm: `, realm.displayName)
-
-    const userData = await getUserData()
-    this.userId = userData.userId
-    this.displayName = userData.displayName
+    log(`You are in parcel: `, parcel.land.sceneJsonData.scene.parcels[0])
     log(`You are: `, userData.userId)
 
+    this.userId = userData.userId
+    this.displayName = userData.displayName
+
     this.socket = new WebSocket(
-      `${this.webSocketUrl}/broadcast/${realm.displayName}`
+      `${this.webSocketUrl}/broadcast/${realm.displayName}/${parcel.land.sceneJsonData.scene.parcels[0]}`
     )
 
     this.socket.onopen = (event) => {
