@@ -3,7 +3,7 @@
   
 *Tourniquette is a multiplayer platform game in [Decentraland](https://decentraland.org/)*
 
-![screenshot](./screenshot.jpg)
+![screenshot](./touniquette.gif)
 
 ## What's in the game
 
