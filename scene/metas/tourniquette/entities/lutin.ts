@@ -1,4 +1,4 @@
-import {Dialog, NPC} from '../../node_modules/@dcl/npc-utils/index'
+import {Dialog, NPC} from '../../../node_modules/@dcl/npc-utils/index'
 
 export class Lutin extends Entity {
 
@@ -112,7 +112,7 @@ export class Lutin extends Entity {
         position: new Vector3(12.5, 1, 1.5),
         rotation: Quaternion.Euler(0, 90 , 0)
       },
-      'models/lutin.glb',
+      'metas/tourniquette/models/lutin.glb',
       () => {
           lutin.talk(lutinSpeaks, 0)
           lutin.playAnimation('dancingJoy', false)
@@ -121,7 +121,7 @@ export class Lutin extends Entity {
       {
         idleAnim : 'dancingJoy',
         faceUser : true,
-        portrait: { path: 'images/lutin.png', height: 256, width: 256 },
+        portrait: { path: 'metas/tourniquette/images/lutin.png', height: 256, width: 256 },
         darkUI: true,
         coolDownDuration: 3,
         hoverText: 'CHAT',

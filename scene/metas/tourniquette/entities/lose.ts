@@ -1,13 +1,15 @@
-export class Win extends Entity {
+export class Lose extends Entity {
 
   entity: Entity
+
   animations = [
-    'Y.002Action',
-    'O.003Action',
-    'U.002Action',
-    'WAction',
-    'O.004Action',
-    'NAction',
+    'YAction',
+    'OAction',
+    'UAction',
+    'LAction',
+    'O.002Action',
+    'SAction',
+    'EAction',
   ]
 
   constructor() {
@@ -16,7 +18,7 @@ export class Win extends Entity {
     engine.addEntity(this)
     this.setParent(Attachable.AVATAR)
 
-    const model = new GLTFShape('models/win.glb')
+    const model = new GLTFShape('metas/tourniquette/models/lose.glb')
     model.withCollisions = false
     this.addComponent(model)
 
@@ -34,13 +36,16 @@ export class Win extends Entity {
       this.getComponent(Animator).addClip(animationState)
       this.getComponent(Animator).getClip(animation).reset()
     })
+
   }
 
-  playWin() {
+  playLose() {
+
     this.animations.forEach(animation => {
       this.getComponent(Animator).getClip(animation).reset()
       this.getComponent(Animator).getClip(animation).play()
     })
+
   }
 
 }

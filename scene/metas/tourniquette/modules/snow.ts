@@ -1,10 +1,10 @@
-import utils from '../../node_modules/decentraland-ecs-utils/index'
+import utils from '../../../node_modules/decentraland-ecs-utils/index'
 
 function random(min: number, max: number) {
   return min + (max-min) *  Math.random();
 }
 
-const flakeTexture = new Texture('textures/snowflake.png')
+const flakeTexture = new Texture('metas/tourniquette/textures/snowflake.png')
 const flakeShape = new PlaneShape()
 const billboard = new Billboard(false, true, false)
 

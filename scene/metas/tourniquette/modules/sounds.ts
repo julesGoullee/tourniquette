@@ -2,23 +2,23 @@ import {TheTourniquette} from "../entities/theTourniquette";
 
 const camera = Camera.instance
 
-const backgroundMusicClip = new AudioClip("sounds/welcome-music.mp3")
-const meteoClip = new AudioClip("sounds/meteo.mp3")
-const gameMusicClip = new AudioClip("sounds/game-music.mp3")
-const failGameClip = new AudioClip("sounds/lose-game.mp3")
-const startGameClip = new AudioClip("sounds/start-game.mp3")
-const winGameClip = new AudioClip("sounds/win-game.mp3")
-const endGameClip = new AudioClip("sounds/santa.mp3")
-const playerFallClip = new AudioClip("sounds/massive-fall.mp3")
-const throwBallClip = new AudioClip("sounds/snowball-throw.mp3")
-const splashBallClip = new AudioClip("sounds/snowball-splash.mp3")
-const grelotsClip = new AudioClip("sounds/grelots.mp3")
+const backgroundMusicClip = new AudioClip("metas/tourniquette/sounds/welcome-music.mp3")
+const meteoClip = new AudioClip("metas/tourniquette/sounds/meteo.mp3")
+const gameMusicClip = new AudioClip("metas/tourniquette/sounds/game-music.mp3")
+const failGameClip = new AudioClip("metas/tourniquette/sounds/lose-game.mp3")
+const startGameClip = new AudioClip("metas/tourniquette/sounds/start-game.mp3")
+const winGameClip = new AudioClip("metas/tourniquette/sounds/win-game.mp3")
+const endGameClip = new AudioClip("metas/tourniquette/sounds/santa.mp3")
+const playerFallClip = new AudioClip("metas/tourniquette/sounds/massive-fall.mp3")
+const throwBallClip = new AudioClip("metas/tourniquette/sounds/snowball-throw.mp3")
+const splashBallClip = new AudioClip("metas/tourniquette/sounds/snowball-splash.mp3")
+const grelotsClip = new AudioClip("metas/tourniquette/sounds/grelots.mp3")
 
-const reverseTourniquetteClip1 = new AudioClip("sounds/reverse-tourniquette-A.mp3")
-const reverseTourniquetteClip2 = new AudioClip("sounds/reverse-tourniquette-B.mp3")
-const reverseTourniquetteClip3 = new AudioClip("sounds/reverse-tourniquette-C.mp3")
-const reverseTourniquetteClip4 = new AudioClip("sounds/reverse-tourniquette-D.mp3")
-const reverseTourniquetteClip5 = new AudioClip("sounds/reverse-tourniquette-E.mp3")
+const reverseTourniquetteClip1 = new AudioClip("metas/tourniquette/sounds/reverse-tourniquette-A.mp3")
+const reverseTourniquetteClip2 = new AudioClip("metas/tourniquette/sounds/reverse-tourniquette-B.mp3")
+const reverseTourniquetteClip3 = new AudioClip("metas/tourniquette/sounds/reverse-tourniquette-C.mp3")
+const reverseTourniquetteClip4 = new AudioClip("metas/tourniquette/sounds/reverse-tourniquette-D.mp3")
+const reverseTourniquetteClip5 = new AudioClip("metas/tourniquette/sounds/reverse-tourniquette-E.mp3")
 const reverseTourniquetteClips = [
   reverseTourniquetteClip1,
   reverseTourniquetteClip2,

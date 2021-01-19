@@ -1,5 +1,5 @@
-import * as ui from '../node_modules/@dcl/ui-utils/index'
-import { PromptStyles, ButtonStyles } from '../node_modules/@dcl/ui-utils/utils/types'
+import * as ui from '../../node_modules/@dcl/ui-utils/index'
+import { PromptStyles, ButtonStyles } from '../../node_modules/@dcl/ui-utils/utils/types'
 
 export default (isWin) => {
   const prompt = new ui.CustomPrompt(PromptStyles.DARKLARGE, 500, 600)
@@ -10,7 +10,7 @@ export default (isWin) => {
     `Ok`,
     0,
     -250,
-    () => {6
+    () => {
       // prompt.close()
     },
     ButtonStyles.E

@@ -1,5 +1,5 @@
-import * as ui from '../../node_modules/@dcl/ui-utils/index'
-import {ButtonStyles, PromptStyles} from '../../node_modules/@dcl/ui-utils/utils/types'
+import * as ui from '../../../node_modules/@dcl/ui-utils/index'
+import {ButtonStyles, PromptStyles} from '../../../node_modules/@dcl/ui-utils/utils/types'
 
 export class Tutorial {
 
@@ -13,7 +13,7 @@ export class Tutorial {
     this.prompt.closeIcon.width = 0
     this.prompt.closeIcon.height = 0
 
-    const imageTitle = new UIImage(this.canvas, new Texture('images/title.png') )
+    const imageTitle = new UIImage(this.canvas, new Texture('metas/tourniquette/images/title.png') )
     imageTitle.width = 283
     imageTitle.height = 65
     imageTitle.positionX = 0
@@ -21,7 +21,7 @@ export class Tutorial {
     imageTitle.sourceWidth = 283
     imageTitle.sourceHeight = 65
 
-    const imageJump = new UIImage(this.canvas, new Texture('images/jump.jpg') )
+    const imageJump = new UIImage(this.canvas, new Texture('metas/tourniquette/images/jump.jpg') )
     imageJump.width = 200
     imageJump.height = 400
     imageJump.positionY = 10
@@ -29,7 +29,7 @@ export class Tutorial {
     imageJump.sourceWidth = 366
     imageJump.sourceHeight = 840
 
-    const imageThrowSnowBall = new UIImage(this.canvas, new Texture('images/swap.jpg') )
+    const imageThrowSnowBall = new UIImage(this.canvas, new Texture('metas/tourniquette/images/swap.jpg') )
     imageThrowSnowBall.width = 200
     imageThrowSnowBall.height = 400
     imageThrowSnowBall.positionY = 10
@@ -37,7 +37,7 @@ export class Tutorial {
     imageThrowSnowBall.sourceWidth = 366
     imageThrowSnowBall.sourceHeight = 840
 
-    const imageReverseRotation = new UIImage(this.canvas, new Texture('images/throw-ball.jpg') )
+    const imageReverseRotation = new UIImage(this.canvas, new Texture('metas/tourniquette/images/throw-ball.jpg') )
     imageReverseRotation.width = 200
     imageReverseRotation.height = 400
     imageReverseRotation.positionY = 10

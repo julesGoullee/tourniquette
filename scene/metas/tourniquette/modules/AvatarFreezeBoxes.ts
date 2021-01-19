@@ -1,4 +1,4 @@
-import utils from '../../node_modules/decentraland-ecs-utils/index'
+import utils from '../../../node_modules/decentraland-ecs-utils/index'
 
 import { AvatarFreezeBox } from '../entities/avatarFreezeBox'
 

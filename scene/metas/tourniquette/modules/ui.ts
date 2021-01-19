@@ -40,7 +40,7 @@ export function createUserWinnerUI(winner: Player, canvas: UICanvas) {
   userWinnerText.color = Color4.White()
 
 
-  const imageAtlas = 'images/couronne.png'
+  const imageAtlas = 'metas/tourniquette/images/couronne.png'
   const imageTexture = new Texture(imageAtlas)
   const userWinnerImg = new UIImage(canvas, imageTexture)
   userWinnerImg.opacity = 1

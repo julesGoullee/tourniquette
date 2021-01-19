@@ -1,4 +1,4 @@
-import utils from '../../node_modules/decentraland-ecs-utils/index'
+import utils from '../../../node_modules/decentraland-ecs-utils/index'
 import {SoundSystem} from "../modules/sounds";
 
 class TheTourniquetteCollider extends Entity {
@@ -48,7 +48,7 @@ export class TheTourniquetteModel extends Entity {
   constructor() {
 
     super()
-    const model = new GLTFShape('models/sucreDorge.glb')
+    const model = new GLTFShape('metas/tourniquette/models/sucreDorge.glb')
     this.addComponent(model)
 
   }

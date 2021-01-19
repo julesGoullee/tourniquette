@@ -1,5 +1,5 @@
 import {PhysicsWorld} from "../modules/physicsWorld";
-import utils from '../../node_modules/decentraland-ecs-utils/index'
+import utils from '../../../node_modules/decentraland-ecs-utils/index'
 import {setInterval} from "../utils";
 import {SoundSystem} from "../modules/sounds";
 
@@ -85,7 +85,7 @@ export class SnowBall extends Entity {
         () => {
 
           soundSystem.snowBallSplash()
-          const imageAtlas = 'images/snowBall.png'
+          const imageAtlas = 'metas/tourniquette/images/snowBall.png'
           const imageTexture = new Texture(imageAtlas)
           const snowSplash = new UIImage(canvas, imageTexture)
           snowSplash.opacity = 1

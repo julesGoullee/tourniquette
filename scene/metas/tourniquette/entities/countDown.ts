@@ -20,7 +20,7 @@ export class CountDownBox extends Entity {
     this.soundSystem = soundSystem
 
     this.setParent(Attachable.AVATAR)
-    this.addComponent(new GLTFShape('models/countDown.glb'))
+    this.addComponent(new GLTFShape('metas/tourniquette/models/countDown.glb'))
     this.getComponent(GLTFShape).withCollisions = false
 
     this.addComponent(new Transform({
