@@ -3,13 +3,15 @@
   
 *Tourniquette is a multiplayer platform game in [Decentraland](https://decentraland.org/)*
 
-![screenshot](./screenshot.png)
+![screenshot](./touniquette.gif)
 
 ## What's in the game
 
 **The Tourniquette** is a 1x1 scene containing a snowball themed for Xmas. 
 
 Visitors can play a 4-player platform game where they need to be the last man standing on a platform, by avoiding a cane sugar rotating ever quickly ! For more challenge, players can reverse the rotation of the cane sugar and throw each other snowballs that will splash on their screens. 
+
+[Watch a video](https://youtu.be/l2YjyiyalX4)
 
 ## Play
 
