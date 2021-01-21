@@ -2,7 +2,7 @@ import {Dialog, NPC} from '../../../node_modules/@dcl/npc-utils/index'
 
 export class Lutin extends Entity {
 
-  constructor() {
+  constructor(pivot: Entity) {
 
     super()
 
@@ -109,7 +109,7 @@ export class Lutin extends Entity {
 
     const lutin = new NPC(
       {
-        position: new Vector3(12.5, 1, 1.5),
+        position: new Vector3(4.5, 1, -7.5),
         rotation: Quaternion.Euler(0, 90 , 0)
       },
       'metas/tourniquette/models/lutin.glb',
@@ -132,6 +132,7 @@ export class Lutin extends Entity {
         // onWalkAway: () => {},
       }
     )
+    lutin.setParent(pivot)
   }
 
 }

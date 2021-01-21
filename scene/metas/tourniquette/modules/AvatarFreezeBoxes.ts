@@ -5,8 +5,11 @@ import { AvatarFreezeBox } from '../entities/avatarFreezeBox'
 export class AvatarFreezeBoxes {
 
   boxes: AvatarFreezeBox[] = []
+  pivot: Entity
 
-  constructor(){
+  constructor(pivot: Entity){
+
+    this.pivot = pivot
 
   }
 
@@ -38,6 +41,7 @@ export class AvatarFreezeBoxes {
         engine.removeEntity(box)
       }) )
       this.boxes.push(box)
+      box.setParent(this.pivot)
       engine.addEntity(box)
     })
 

@@ -45,8 +45,10 @@ class Sound extends Entity {
 export class SoundSystem implements ISystem {
   soundEntities: object;
   reverseTourniquetteCounter: number = 0
+  pivot: Entity
 
-  constructor() {
+  constructor(pivot: Entity) {
+    this.pivot = pivot
     this.soundEntities = {}
   }
 
@@ -79,7 +81,7 @@ export class SoundSystem implements ISystem {
 
   backgroundMusic(playing: boolean = true) {
     const transform = new Transform({
-      position: new Vector3(8, 4, 8),
+      position: this.pivot.getComponent(Transform).position.add(new Vector3(0, 4, 0) ),
     })
     const sound = this.getOrCreateSound('backgroundMusic', backgroundMusicClip, transform)
     const audioSource = sound.getComponent(AudioSource);
@@ -90,7 +92,7 @@ export class SoundSystem implements ISystem {
 
   backgroundMeteo(playing: boolean = true) {
     const transform = new Transform({
-      position: new Vector3(8, 7, 8),
+      position: this.pivot.getComponent(Transform).position.add(new Vector3(0, 7, 0) ),
     })
     const meteosound = this.getOrCreateSound('backgroundMeteo', meteoClip, transform)
     const meteoaudiosource = meteosound.getComponent(AudioSource);
@@ -101,7 +103,7 @@ export class SoundSystem implements ISystem {
 
   gameMusic(playing: boolean = true) {
     const transform = new Transform({
-      position: new Vector3(8, 8, 8),
+      position: this.pivot.getComponent(Transform).position.add(new Vector3(0, 8, 0) ),
     })
     const sound = this.getOrCreateSound('gameMusic', gameMusicClip, transform)
     const audioSource = sound.getComponent(AudioSource);
@@ -112,7 +114,7 @@ export class SoundSystem implements ISystem {
 
   startGame() {
     const transform = new Transform({
-      position: new Vector3(8, 8, 8),
+      position: this.pivot.getComponent(Transform).position.add(new Vector3(0, 8, 0) ),
     })
     const sound = this.getOrCreateSound('startGame', startGameClip, transform)
     const audioSource = sound.getComponent(AudioSource);
@@ -120,7 +122,7 @@ export class SoundSystem implements ISystem {
   }
   failGame() {
     const transform = new Transform({
-      position: new Vector3(8, 4, 8),
+      position: this.pivot.getComponent(Transform).position.add(new Vector3(0, 4, 0) ),
     })
     const sound = this.getOrCreateSound('failGame', failGameClip, transform)
     const audioSource = sound.getComponent(AudioSource);
@@ -129,7 +131,7 @@ export class SoundSystem implements ISystem {
   }
   winGame() {
     const transform = new Transform({
-      position: new Vector3(8, 8, 8),
+      position: this.pivot.getComponent(Transform).position.add(new Vector3(0, 8, 0) ),
     })
     const sound = this.getOrCreateSound('winGame', winGameClip, transform)
     const audioSource = sound.getComponent(AudioSource);
@@ -138,7 +140,7 @@ export class SoundSystem implements ISystem {
   }
   endGame() {
     const transform = new Transform({
-      position: new Vector3(8, 4, 8),
+      position: this.pivot.getComponent(Transform).position.add(new Vector3(0, 4, 0) ),
     })
     const sound = this.getOrCreateSound('endGame', endGameClip, transform)
     const audioSource = sound.getComponent(AudioSource);
@@ -147,7 +149,7 @@ export class SoundSystem implements ISystem {
 
   otherPlayerFall() {
     const transform = new Transform({
-      position: new Vector3(8, 4, 8),
+      position: this.pivot.getComponent(Transform).position.add(new Vector3(0, 4, 0) ),
     })
     const sound = this.getOrCreateSound('playerFall', playerFallClip, transform)
     const audioSource = sound.getComponent(AudioSource);

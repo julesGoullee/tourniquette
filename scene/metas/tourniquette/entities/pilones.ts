@@ -2,7 +2,7 @@ import utils from "../../../node_modules/decentraland-ecs-utils/index"
 export class ThePilones extends Entity {
 
 
-  constructor(gameSpot: Vector3) {
+  constructor(pivot: Entity, gameSpot: Vector3) {
 
     super()
     const model = new BoxShape()
@@ -20,6 +20,7 @@ export class ThePilones extends Entity {
       rotation: Quaternion.Euler(0, 45, 0)
     }))
 
+    this.setParent(pivot)
     engine.addEntity(this)
 
   }

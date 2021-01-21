@@ -25,7 +25,7 @@ class User {
   fallenOut = false
   intervalAlive?: NodeJS.Timeout
   wsIsAlive = true
-  position: Position = { x: -1, y: -1, z: -1 }
+  position: Position = { x: 0, y: 0, z: 0 }
 
   constructor(ws: WebSocket, room: Room){
 
@@ -36,10 +36,10 @@ class User {
 
   isOutsideParcel() {
 
-    return this.position.x < 0 ||
-      this.position.x > 16 ||
-      this.position.z > 16 ||
-      this.position.z < 0
+    return this.position.x < -8 ||
+      this.position.x > 8 ||
+      this.position.z > 8 ||
+      this.position.z < -8
 
   }
 
@@ -187,7 +187,7 @@ class User {
 
     }
 
-    this.position = { x: -1, y: -1, z: -1 }
+    this.position = { x: 0, y: 0, z: 0 }
     this.room.removeUser(this)
 
   }

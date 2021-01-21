@@ -64,7 +64,7 @@ export class TheTourniquette extends Entity {
   rotationSpeed: number
   soundSystem: SoundSystem
 
-  constructor(soundSystem: SoundSystem, onClick: () => void) {
+  constructor(pivot: Entity, soundSystem: SoundSystem, onClick: () => void) {
 
     super()
 
@@ -72,13 +72,14 @@ export class TheTourniquette extends Entity {
 
     const transform = new Transform({
       //position: new Vector3(8, 13, 8),
-      position: new Vector3(8, 12, 8),
+      position: new Vector3(0, 12, 0),
       scale:  new Vector3(1, 1, 1),
       rotation: Quaternion.Euler(0,45,0)
     })
 
     this.addComponent(transform)
 
+    this.setParent(pivot)
     engine.addEntity(this)
 
     this.theTourniquetteModel = new TheTourniquetteModel()

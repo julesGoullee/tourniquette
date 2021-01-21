@@ -63,11 +63,12 @@ export class SnowSystem implements ISystem {
   static MAX_FLAKES = 80
   bounds: Vector4
 
-  constructor(bounds: Vector4) {
+  constructor(pivot: Entity, bounds: Vector4) {
     this.bounds = bounds
     this.snowEntity = new Entity()
     this.flakes = []
     this.spawnFlakes()
+    this.snowEntity.setParent(pivot)
     engine.addEntity(this.snowEntity)
   }
 

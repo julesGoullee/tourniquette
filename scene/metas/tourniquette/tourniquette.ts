@@ -22,12 +22,20 @@ import { Win } from './entities/win'
 import { Lose } from './entities/lose'
 import {createUserWinnerUI, GameMessage} from './modules/ui'
 import {Tutorial} from './modules/Tutorial'
+import { getEntityWorldPosition } from '../../node_modules/decentraland-ecs-utils/helpers/helperfunctions'
 
 export class Tourniquette implements ISystem {
 
-  // webSocketUrl = 'ws://192.168.100.4:13370'
-  webSocketUrl = 'ws://localhost:13370'
+  webSocketUrl = 'ws://192.168.1.31:13370'
+  // webSocketUrl = 'ws://localhost:13370'
   // webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
+  api = null
+  hostData = {
+    tourniquette: {
+      position: { x:8, y: 0, z: 8 },
+      rotation: { x:0, y: 0, z: 0 },
+    }
+  }
   timeoutReconnectWebSocket: ITimeoutClean | undefined
   socket: WebSocket
   userId: string
@@ -48,13 +56,14 @@ export class Tourniquette implements ISystem {
   physicsWorld: PhysicsWorld
 
   gameSpots: Vector3[] = [
-    new Vector3(3, 12, 8),
-    new Vector3(8, 12, 3),
-    new Vector3(13, 12, 8),
-    new Vector3(8, 12, 13)
+    new Vector3(-5, 12, 0),
+    new Vector3(0, 12, -5),
+    new Vector3(5, 12, 0),
+    new Vector3(0, 12, 5)
   ]
 
   // ground: Entity
+  pivot: Entity
   xmasBall: Entity
   pilones: Entity[] = []
   snowBalls: SnowBall[] = []
@@ -71,17 +80,20 @@ export class Tourniquette implements ISystem {
 
   soundSystem: SoundSystem
 
-  constructor(api, hostData){
+  constructor(api, host){
 
-    this.soundSystem = new SoundSystem()
+    this.api = api
+    this.createPivot()
+    this.refreshHost(host)
+    this.soundSystem = new SoundSystem(this.pivot)
     this.soundSystem.backgroundMusic()
     this.soundSystem.backgroundMeteo()
 
     this.canvas = new CornerLabel('').canvas
     new Tutorial(this.canvas)
     // this.createGround()
-    new XmasBall()
-    new Lutin()
+    new XmasBall(this.pivot)
+    new Lutin(this.pivot)
 
     this.createThePilones()
     this.createTeleporter()
@@ -91,7 +103,7 @@ export class Tourniquette implements ISystem {
       this.onSocketFailed()
     })
 
-    this.avatarFreezeBoxes = new AvatarFreezeBoxes()
+    this.avatarFreezeBoxes = new AvatarFreezeBoxes(this.pivot)
 
     this.createTheTourniquette()
     this.countDownBox = new CountDownBox(this.soundSystem)
@@ -101,8 +113,8 @@ export class Tourniquette implements ISystem {
     this.createGameText()
     this.listenSnowBallHit()
 
-    const bounds = new Vector4(3, 13, 5, 16)
-    engine.addSystem(new SnowSystem(bounds))
+    const bounds = new Vector4(-4, 5, 5, 16)
+    engine.addSystem(new SnowSystem(this.pivot, bounds))
     engine.addSystem(this.soundSystem)
 
   }
@@ -110,6 +122,18 @@ export class Tourniquette implements ISystem {
   createGameText() {
 
     this.gameMessage = new GameMessage(this.canvas)
+
+  }
+
+  createPivot(){
+
+    this.pivot = new Entity()
+    this.pivot.addComponentOrReplace(new Transform({
+      position: new Vector3(this.hostData.tourniquette.position.x, this.hostData.tourniquette.position.y, this.hostData.tourniquette.position.z),
+      rotation: Quaternion.Euler(this.hostData.tourniquette.rotation.x, this.hostData.tourniquette.rotation.y, this.hostData.tourniquette.rotation.z),
+      scale: new Vector3(1, 1, 1),
+    }) )
+    engine.addEntity(this.pivot)
 
   }
 
@@ -151,11 +175,11 @@ export class Tourniquette implements ISystem {
   update(dt: number): void {
 
     if (this.isPlaying && !this.fallenOut && (
-      this.camera.position.y < 11 ||
-      this.camera.position.x < 0 ||
-      this.camera.position.x > 16 ||
-      this.camera.position.z > 16 ||
-      this.camera.position.z < 0
+      this.camera.position.y < this.pivot.getComponent(Transform).position.y + 11 ||
+      this.camera.position.x < this.pivot.getComponent(Transform).position.x - 8 ||
+      this.camera.position.x > this.pivot.getComponent(Transform).position.x + 8 ||
+      this.camera.position.z > this.pivot.getComponent(Transform).position.z + 8 ||
+      this.camera.position.z < this.pivot.getComponent(Transform).position.z - 8
     )) {
 
       this.onFallout()
@@ -211,7 +235,7 @@ export class Tourniquette implements ISystem {
 
   createTheTourniquette(){
 
-    this.theTourniquette = new TheTourniquette(this.soundSystem, () => {
+    this.theTourniquette = new TheTourniquette(this.pivot, this.soundSystem, () => {
 
       if(this.isPlaying && !this.fallenOut && this.hitTourniquetteAllowed){
 
@@ -235,13 +259,13 @@ export class Tourniquette implements ISystem {
 
   createThePilones(){
     this.gameSpots.forEach(gameSpot => {
-      this.pilones.push(new ThePilones(gameSpot))
+      this.pilones.push(new ThePilones(this.pivot, gameSpot))
     })
   }
 
   createTeleporter(){
 
-    this.teleporter = new Teleporter((e) => {
+    this.teleporter = new Teleporter(this.pivot, (e) => {
 
       this.sendSocket('START');
 
@@ -273,7 +297,11 @@ export class Tourniquette implements ISystem {
 
     this.theTourniquette.resetRotation()
 
-    movePlayerTo(this.gameSpots[userPosition].add(new Vector3(0, 6, 0) ), { x: -14 * 16 + 8, y: 18, z: -120 * 16 +8 })
+    movePlayerTo(getEntityWorldPosition(this.pilones[userPosition]).add(new Vector3(0, 6, 0) ), {
+      x: this.pivot.getComponent(Transform).position.x,
+      y: 18 + this.pivot.getComponent(Transform).position.y,
+      z: this.pivot.getComponent(Transform).position.z
+    })
     // movePlayerTo(new Vector3(8, 20, 8), { x: 8, y: 11, z: 8 })
     this.avatarFreezeBoxes.add(this.gameSpots[userPosition])
 
@@ -429,7 +457,7 @@ export class Tourniquette implements ISystem {
             'PONG',
             {
               time: Date.now(),
-              position: this.camera.position
+              position: this.camera.position.subtract(this.pivot.getComponent(Transform).position)
             }
           );
 
@@ -507,5 +535,17 @@ export class Tourniquette implements ISystem {
 
     }
   }
+
+  refreshHost(host: any){
+
+    this.hostData = JSON.parse(host.host_data)
+    this.pivot.addComponentOrReplace(new Transform({
+      position: new Vector3(this.hostData.tourniquette.position.x, this.hostData.tourniquette.position.y, this.hostData.tourniquette.position.z),
+      rotation: Quaternion.Euler(this.hostData.tourniquette.rotation.x, this.hostData.tourniquette.rotation.y, this.hostData.tourniquette.rotation.z),
+      scale: new Vector3(1, 1, 1),
+    }) )
+
+  }
+
 }
 

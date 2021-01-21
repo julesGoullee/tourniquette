@@ -4,7 +4,7 @@ export class Teleporter extends Entity {
 
   onPointerDown: OnPointerDown
 
-  constructor(onClick) {
+  constructor(pivot: Entity, onClick) {
 
     super()
     this.addComponent(new BoxShape())
@@ -17,10 +17,11 @@ export class Teleporter extends Entity {
 
     this.addComponent(new Transform({
       // position: new Vector3(2, 2, 2),
-      position: new Vector3(7.7, 6, 8.4),
+      position: new Vector3(-0.3, 6, 0.4),
       scale: new Vector3(1, 1, 1.2),
       rotation: Quaternion.Euler(0, 45, 0),
     }))
+    this.setParent(pivot)
     engine.addEntity(this)
 
     this.onPointerDown = new OnPointerDown(onClick, {
