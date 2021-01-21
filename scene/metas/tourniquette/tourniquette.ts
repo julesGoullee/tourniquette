@@ -26,9 +26,9 @@ import { getEntityWorldPosition } from '../../node_modules/decentraland-ecs-util
 
 export class Tourniquette implements ISystem {
 
-  webSocketUrl = 'ws://192.168.1.31:13370'
+  // webSocketUrl = 'ws://192.168.1.31:13370'
   // webSocketUrl = 'ws://localhost:13370'
-  // webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
+  webSocketUrl = 'wss://i-am-decentraland.unexpected.io'
   api = null
   hostData = {
     tourniquette: {
